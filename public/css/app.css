@@ -12456,6 +12456,10 @@ label.panel-block:hover {
   cursor: pointer;
 }
 
+.modal-background {
+  background-color: black;
+}
+
 .tfa {
   display: block;
   height: auto;
@@ -12467,6 +12471,22 @@ label.panel-block:hover {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  background-color: #1a1a1a;
+  /*black-bis from Bulma*/
+  max-width: 400px;
+}
+
+@media screen and (max-width: 768px) {
+  .tfa {
+    border-radius: unset;
+    text-align: inherit;
+    border-bottom: 1px solid #363636;
+    background-color: #242424;
+    /*black-ter from Bulma*/
+    margin: 0;
+    padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+    max-width: none;
+  }
 }
 
 .tfa img {
@@ -12477,6 +12497,9 @@ label.panel-block:hover {
 
 .tfa span {
   display: block;
+}
+
+.has-ellipsis {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;

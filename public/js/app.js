@@ -12145,6 +12145,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -16914,11 +16916,11 @@ var render = function() {
         )
       : _vm._e(),
     _vm._v(" "),
-    _c("p", { staticClass: "is-size-4 has-text-grey-light" }, [
+    _c("p", { staticClass: "is-size-4 has-text-grey-light has-ellipsis" }, [
       _vm._v(_vm._s(_vm.service))
     ]),
     _vm._v(" "),
-    _c("p", { staticClass: "is-size-6 has-text-grey" }, [
+    _c("p", { staticClass: "is-size-6 has-text-grey has-ellipsis" }, [
       _vm._v(_vm._s(_vm.account))
     ]),
     _vm._v(" "),
@@ -17062,8 +17064,7 @@ var render = function() {
                   _c(
                     "div",
                     {
-                      staticClass:
-                        "tfa has-background-black-bis has-text-white is-size-3",
+                      staticClass: "tfa has-text-white is-size-3 has-ellipsis",
                       on: {
                         click: function($event) {
                           $event.stopPropagation()
@@ -17086,7 +17087,7 @@ var render = function() {
                         "span",
                         {
                           staticClass:
-                            "is-family-primary is-size-6 has-text-grey"
+                            "is-family-primary is-size-6 has-text-grey "
                         },
                         [_vm._v(_vm._s(account.account))]
                       )
@@ -17200,36 +17201,38 @@ var render = function() {
           ? _c("div", { staticClass: "columns is-gapless" }, [
               _c("div", { staticClass: "column has-text-centered" }, [
                 _c("div", { staticClass: "field is-grouped" }, [
-                  _c(
-                    "p",
-                    { staticClass: "control" },
-                    [
-                      _c(
-                        "router-link",
-                        {
-                          staticClass: "button is-link is-rounded is-focus",
-                          attrs: { to: { name: "create" } }
-                        },
+                  !_vm.editMode
+                    ? _c(
+                        "p",
+                        { staticClass: "control" },
                         [
-                          _c("span", [
-                            _vm._v(_vm._s(_vm.$t("twofaccounts.new")))
-                          ]),
-                          _vm._v(" "),
                           _c(
-                            "span",
-                            { staticClass: "icon is-small" },
+                            "router-link",
+                            {
+                              staticClass: "button is-link is-rounded is-focus",
+                              attrs: { to: { name: "create" } }
+                            },
                             [
-                              _c("font-awesome-icon", {
-                                attrs: { icon: ["fas", "qrcode"] }
-                              })
-                            ],
-                            1
+                              _c("span", [
+                                _vm._v(_vm._s(_vm.$t("twofaccounts.new")))
+                              ]),
+                              _vm._v(" "),
+                              _c(
+                                "span",
+                                { staticClass: "icon is-small" },
+                                [
+                                  _c("font-awesome-icon", {
+                                    attrs: { icon: ["fas", "qrcode"] }
+                                  })
+                                ],
+                                1
+                              )
+                            ]
                           )
-                        ]
+                        ],
+                        1
                       )
-                    ],
-                    1
-                  ),
+                    : _vm._e(),
                   _vm._v(" "),
                   _c("p", { staticClass: "control" }, [
                     !_vm.editMode
@@ -17251,7 +17254,8 @@ var render = function() {
                       ? _c(
                           "a",
                           {
-                            staticClass: "button is-success is-rounded",
+                            staticClass:
+                              "button is-success is-rounded is-medium",
                             on: {
                               click: function($event) {
                                 _vm.editMode = false
@@ -36542,8 +36546,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\Users\lf151415\Code Hub\Repositories\2FAuth\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! C:\Users\lf151415\Code Hub\Repositories\2FAuth\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /media/bubka/DocsDrive/Repositories/2FAuth/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /media/bubka/DocsDrive/Repositories/2FAuth/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
