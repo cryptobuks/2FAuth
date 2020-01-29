@@ -332,7 +332,7 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! /media/bubka/DocsDrive/Repositories/2FAuth/resources/js/langs/locales.js */"./resources/js/langs/locales.js");
+module.exports = __webpack_require__(/*! C:\Users\lf151415\Code Hub\Repositories\2FAuth\resources\js\langs\locales.js */"./resources/js/langs/locales.js");
 
 
 /***/ })

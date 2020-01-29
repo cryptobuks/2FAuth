@@ -12141,6 +12141,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -17052,93 +17056,88 @@ var render = function() {
             _vm._v(" "),
             _c(
               "div",
-              { staticClass: "buttons are-large is-centered" },
+              { staticClass: "columns is-multiline is-centered is-gapless" },
               _vm._l(_vm.filteredAccounts, function(account) {
-                return _c(
-                  "span",
-                  {
-                    staticClass:
-                      "button is-black has-background-black-bis twofaccount"
-                  },
-                  [
-                    _c(
-                      "span",
-                      {
-                        on: {
-                          click: function($event) {
-                            $event.stopPropagation()
-                            return _vm.showAccount(account.id)
-                          }
+                return _c("div", { staticClass: "column is-narrow" }, [
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "tfa has-background-black-bis has-text-white is-size-3",
+                      on: {
+                        click: function($event) {
+                          $event.stopPropagation()
+                          return _vm.showAccount(account.id)
                         }
-                      },
-                      [
-                        account.icon
-                          ? _c("img", {
-                              attrs: { src: "storage/icons/" + account.icon }
-                            })
-                          : _vm._e(),
-                        _vm._v(
-                          "\n                    " +
-                            _vm._s(account.service) +
-                            "\n                    "
-                        ),
-                        _c(
-                          "span",
-                          {
-                            staticClass:
-                              "is-family-primary is-size-7 has-text-grey"
-                          },
-                          [_vm._v(_vm._s(account.account))]
-                        )
-                      ]
-                    ),
-                    _vm._v(" "),
-                    _vm.editMode
-                      ? _c(
-                          "span",
-                          [
-                            _c(
-                              "router-link",
-                              {
-                                staticClass: "tag is-dark",
-                                attrs: {
-                                  to: {
-                                    name: "edit",
-                                    params: { twofaccountId: account.id }
-                                  }
+                      }
+                    },
+                    [
+                      account.icon
+                        ? _c("img", {
+                            attrs: { src: "/storage/icons/" + account.icon }
+                          })
+                        : _vm._e(),
+                      _vm._v(
+                        "\n                    " +
+                          _vm._s(account.service) +
+                          "\n                    "
+                      ),
+                      _c(
+                        "span",
+                        {
+                          staticClass:
+                            "is-family-primary is-size-6 has-text-grey"
+                        },
+                        [_vm._v(_vm._s(account.account))]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _vm.editMode
+                    ? _c(
+                        "span",
+                        [
+                          _c(
+                            "router-link",
+                            {
+                              staticClass: "tag is-dark",
+                              attrs: {
+                                to: {
+                                  name: "edit",
+                                  params: { twofaccountId: account.id }
                                 }
-                              },
-                              [
-                                _c("font-awesome-icon", {
-                                  attrs: { icon: ["fas", "edit"] }
-                                })
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "a",
-                              {
-                                staticClass: "tag is-dark",
-                                on: {
-                                  click: function($event) {
-                                    return _vm.deleteAccount(account.id)
-                                  }
+                              }
+                            },
+                            [
+                              _c("font-awesome-icon", {
+                                attrs: { icon: ["fas", "edit"] }
+                              })
+                            ],
+                            1
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "a",
+                            {
+                              staticClass: "tag is-dark",
+                              on: {
+                                click: function($event) {
+                                  return _vm.deleteAccount(account.id)
                                 }
-                              },
-                              [
-                                _c("font-awesome-icon", {
-                                  attrs: { icon: ["fas", "trash"] }
-                                })
-                              ],
-                              1
-                            )
-                          ],
-                          1
-                        )
-                      : _vm._e()
-                  ]
-                )
+                              }
+                            },
+                            [
+                              _c("font-awesome-icon", {
+                                attrs: { icon: ["fas", "trash"] }
+                              })
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      )
+                    : _vm._e()
+                ])
               }),
               0
             )
@@ -18889,7 +18888,7 @@ var render = function() {
                 ? _c("span", { staticClass: "tag is-black is-large" }, [
                     _c("img", {
                       staticClass: "icon-preview",
-                      attrs: { src: "storage/icons/" + _vm.tempIcon }
+                      attrs: { src: "/storage/icons/" + _vm.tempIcon }
                     }),
                     _vm._v(" "),
                     _c("button", {
@@ -19217,7 +19216,7 @@ var render = function() {
                 ? _c("span", { staticClass: "tag is-black is-large" }, [
                     _c("img", {
                       staticClass: "icon-preview",
-                      attrs: { src: "../storage/icons/" + _vm.tempIcon }
+                      attrs: { src: "/storage/icons/" + _vm.tempIcon }
                     }),
                     _vm._v(" "),
                     _c("button", {
@@ -36543,8 +36542,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /media/bubka/DocsDrive/Repositories/2FAuth/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /media/bubka/DocsDrive/Repositories/2FAuth/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\lf151415\Code Hub\Repositories\2FAuth\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\lf151415\Code Hub\Repositories\2FAuth\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
