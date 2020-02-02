@@ -1,10 +1,20 @@
 <template>
     <div>
         <div class="container" v-if="this.showAccounts">
-            <!-- search -->
+            <!-- header -->
             <div class="columns is-gapless is-mobile is-centered">
                 <div class="column is-three-quarters-mobile is-one-third-tablet is-one-quarter-desktop is-one-quarter-widescreen is-one-quarter-fullhd">
-                    <div class="field">
+                    <!-- toolbar -->
+                    <div class="toolbar has-text-centered" v-if="editMode">
+                        <a class="button" :class="{ 'is-dark': selectedAccounts.length === 0, 'is-danger': selectedAccounts.length > 0 }" :disabled="selectedAccounts.length == 0" @click="destroyAccounts">
+                            <span class="icon is-small">
+                                <font-awesome-icon :icon="['fas', 'trash']" />
+                            </span>
+                            <span>{{ $t('commons.delete') }}</span>
+                        </a>
+                    </div>
+                    <!-- search -->
+                    <div class="field" v-else>
                         <div class="control has-icons-right">
                             <input type="text" class="input is-rounded is-search" v-model="search">
                             <span class="icon is-small is-right">
@@ -16,25 +26,31 @@
                 </div>
             </div>
             <!-- accounts -->
-            <div class="columns is-multiline is-centered is-gapless">
-                <div class="column is-narrow" v-for="account in filteredAccounts">
-                    <div class="tfa has-text-white is-size-3 has-ellipsis" @click.stop="showAccount(account.id)">
-                        <img :src="'/storage/icons/' + account.icon" v-if="account.icon">
-                        {{ account.service }}
-                        <span class="is-family-primary is-size-6 has-text-grey ">{{ account.account }}</span>
+            <div class="accounts columns is-multiline is-centered">
+                <div class="tfa column is-narrow has-text-white" v-for="account in filteredAccounts">
+                    <div class="tfa-container">
+                        <div class="tfa-checkbox" v-if="editMode">
+                            <div class="field">
+                                <input class="is-checkradio is-small is-white" :id="'ckb_' + account.id" :value="account" type="checkbox" :name="'ckb_' + account.id" v-model="selectedAccounts">
+                                <label :for="'ckb_' + account.id"></label>
+                            </div>
+                        </div>
+                        <div class="tfa-content is-size-3 is-size-4-mobile" @click.stop="showAccount(account.id)">  
+                            <div class="tfa-text has-ellipsis">
+                                <img :src="'/storage/icons/' + account.icon" v-if="account.icon">
+                                {{ account.service }}
+                                <span class="is-family-primary is-size-6 is-size-7-mobile has-text-grey ">{{ account.account }}</span>
+                            </div>
+                        </div>
+                        <div class="tfa-dots has-text-grey" v-if="editMode">
+                            <router-link :to="{ name: 'edit', params: { twofaccountId: account.id }}" class="tag is-dark is-rounded">
+                                {{ $t('commons.edit') }}
+                            </router-link>
+                        </div>
                     </div>
-                    <span v-if="editMode">
-                        <router-link :to="{ name: 'edit', params: { twofaccountId: account.id }}" class="tag is-dark">
-                            <font-awesome-icon :icon="['fas', 'edit']" />
-                        </router-link>
-                        <a class="tag is-dark" v-on:click="deleteAccount(account.id)">
-                            <font-awesome-icon :icon="['fas', 'trash']" />
-                        </a>
-                    </span>
                 </div>
             </div>
         </div>
-
         <!-- No account -->
         <div class="container has-text-centered" v-show="this.showNoAccount">
             <p class="no-account"></p>
@@ -61,8 +77,8 @@
                             </router-link>
                         </p>
                         <p class="control">
-                            <a class="button is-dark is-rounded" @click="editMode = true" v-if="!editMode">{{ $t('twofaccounts.manage') }}</a>
-                            <a class="button is-success is-rounded is-medium" @click="editMode = false" v-if="editMode">
+                            <a class="button is-dark is-rounded" @click="setEditModeTo(true)" v-if="!editMode">{{ $t('twofaccounts.manage') }}</a>
+                            <a class="button is-success is-rounded" @click="setEditModeTo(false)" v-if="editMode">
                                 <span>{{ $t('twofaccounts.done') }}</span>
                                 <span class="icon is-small">
                                     <font-awesome-icon :icon="['fas', 'check']" />
@@ -89,12 +105,13 @@
         data(){
             return {
                 accounts : [],
+                selectedAccounts: [],
                 ShowTwofaccountInModal : false,
                 search: '',
                 username : null,
                 editMode: this.InitialEditMode,
                 showAccounts: null,
-                showNoAccount: null
+                showNoAccount: null,
             }
         },
 
@@ -105,29 +122,16 @@
                         return item.service.toLowerCase().includes(this.search.toLowerCase()) || item.account.toLowerCase().includes(this.search.toLowerCase());
                     }
                 );
-            }
+            },
             
         },
 
         props: ['InitialEditMode'],
 
-        mounted(){
+        created() {
 
             this.username = localStorage.getItem('user')
-
-            this.axios.get('api/twofaccounts').then(response => {
-                response.data.forEach((data) => {
-                    this.accounts.push({
-                        id : data.id,
-                        service : data.service,
-                        account : data.account ? data.account : '-',
-                        icon : data.icon
-                    })
-                })
-                
-                this.showAccounts = this.accounts.length > 0 ? true : false
-                this.showNoAccount = !this.showAccounts
-            })
+            this.fetchAccounts()
 
             // stop OTP generation on modal close
             this.$on('modalClose', function() {
@@ -143,8 +147,27 @@
         },
 
         methods: {
+
+            fetchAccounts() {
+                this.accounts = []
+                this.selectedAccounts = []
+
+                this.axios.get('api/twofaccounts').then(response => {
+                    response.data.forEach((data) => {
+                        this.accounts.push({
+                            id : data.id,
+                            service : data.service,
+                            account : data.account ? data.account : '-',
+                            icon : data.icon
+                        })
+                    })
+                    
+                    this.showAccounts = this.accounts.length > 0 ? true : false
+                    this.showNoAccount = !this.showAccounts
+                })
+            },
+
             showAccount(id) {
-                
                 if( id ) {
                     this.$refs.TwofaccountShow.getAccount(id)
                 }
@@ -156,12 +179,28 @@
 
             deleteAccount:  function (id) {
                 if(confirm(this.$t('twofaccounts.confirm.delete'))) {
-
                     this.axios.delete('/api/twofaccounts/' + id)
 
-                    this.accounts.splice(this.accounts.findIndex(x => x.id === id), 1);
+                    // Remove the deleted account from the collection
+                    this.accounts = this.accounts.filter(a => a.id !== id)
+
                     this.showAccounts = this.accounts.length > 0 ? true : false
                     this.showNoAccount = !this.showAccounts
+                }
+            },
+
+            async destroyAccounts() {
+                if(confirm(this.$t('twofaccounts.confirm.delete'))) {
+
+                    let ids = []
+                    this.selectedAccounts.forEach(account => ids.push(account.id))
+
+                    // Backend will delete all accounts at the same time
+                    await this.axios.delete('/api/twofaccounts/batch', {data: ids} )
+
+                    // we fetch the accounts again to prevent the js collection being
+                    // desynchronize from the backend php collection
+                    this.fetchAccounts()
                 }
             },
 
@@ -178,6 +217,15 @@
                     this.$router.go('/login');
 
                 }
+            },
+
+            setEditModeTo(state) {
+                if( state === false ) {
+                    this.selectedAccounts = []
+                }
+
+                this.editMode = state
+                this.$parent.showToolbar = state
             }
 
         },

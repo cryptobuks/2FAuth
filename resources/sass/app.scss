@@ -6,10 +6,25 @@
 
 // Bootstrap
 //@import '~bootstrap/scss/bootstrap';
-@import '~bulma/bulma';
+@import '~bulma';
+@import '~bulma-checkradio';
 
 .main-section {
   padding: 1.5rem 1rem 8rem 1rem;
+}
+
+.search {
+  margin-bottom: 0 !important;
+}
+
+.accounts {
+  margin-top: 0.75rem;
+}
+
+@media screen and (max-width: 768px) {
+  .main-section {
+    padding: 0.75rem 1rem 8rem 1rem;
+  }
 }
 
 .form-column {
@@ -30,22 +45,16 @@
 }
 
 .modal-background {
-  background-color: black;
+  background-color: hsl(0, 0%, 14%) !important;
 }
 
 .tfa {
-    display: block;
-    height: auto;
     border-radius: 6px;
     text-align: center;
-    padding: 0.75rem 2.5rem;
-    margin: 0.5rem;
     cursor: pointer;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
     background-color: hsl(0, 0%, 10%); /*black-bis from Bulma*/
-    max-width: 400px;
+    padding: 0.75rem 1.5rem;
+    margin: 0.5rem;
 }
 
 @media screen and (max-width: 768px) {
@@ -58,6 +67,82 @@
       padding: 0.5rem 0.5rem 0.5rem 0.5rem;
       max-width: none;
   }
+}
+
+.tfa-container {
+  align-items: center;
+  display: flex;
+  justify-content: left;
+  flex-direction: column;
+}
+
+@media screen and (max-width: 768px) {
+  .tfa-container {
+    flex-direction: row;
+  }
+
+  .tfa-container > div:first-of-type {
+      padding: 0 0 0 0.5rem;
+  }
+
+  .tfa-container > div:last-of-type {
+      padding: 0 0.5rem 0 0;
+  }
+}
+
+.tfa-checkbox, .tfa-dots {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0 0 0;
+}
+
+@media screen and (max-width: 768px) {
+  .tfa-checkbox, .tfa-dots {
+    display: flex;
+    align-items: center;
+      padding: 0
+  }
+}
+
+.tfa-content {
+    flex-grow: 1;
+    // order: 1;
+    overflow: hidden;
+}
+
+.tfa-checkbox {
+  // order: 2;
+}
+
+.tfa-dots {
+  // order: 3;
+}
+
+@media screen and (max-width: 768px) {
+  .tfa-checkbox {
+    order: 1;
+  }
+
+  .tfa-content {
+      order: 2;
+  }
+
+  .tfa-dots {
+    order: 3;
+  }
+}
+
+@media screen and (min-width: 769px) {
+  .is-checkradio[type="checkbox"] + label, .is-checkradio[type="radio"] + label {
+    padding-left: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+.tfa-text {
+    display: block;
+    max-width: 300px;
 }
 
 .tfa img {

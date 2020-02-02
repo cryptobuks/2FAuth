@@ -56,10 +56,8 @@ class TwoFAccountController extends Controller
      * @param  \App\TwoFAccount  $twofaccount
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(TwoFAccount $twofaccount)
     {
-        $twofaccount = TwoFAccount::FindOrFail($id);
-
         return response()->json($twofaccount, 200);
     }
 
@@ -72,9 +70,7 @@ class TwoFAccountController extends Controller
      */
     public function generateOTP(TwoFAccount $twofaccount)
     {
-
         return response()->json(OTP::generate($twofaccount->uri), 200);
-
     }
 
 
@@ -147,16 +143,25 @@ class TwoFAccountController extends Controller
      * @param  \App\TwoFAccount  $twofaccount
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(TwoFAccount $twofaccount)
     {
-
-        $twofaccount = TwoFAccount::FindOrFail($id);
-
-        // delete icon
-        Storage::delete('public/icons/' . $twofaccount->icon);
-
-        // delete account
         $twofaccount->delete();
+
+        return response()->json(null, 204);
+    }
+
+
+    /**
+     * Remove the specified resources from storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function batchDestroy(Request $request)
+    {
+        $ids = $request->all();
+        
+        TwoFAccount::destroy($ids);
 
         return response()->json(null, 204);
     }

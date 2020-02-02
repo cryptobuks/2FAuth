@@ -1,7 +1,7 @@
 <template>
-    <div class="main-section">
+    <main class="main-section">
         <router-view></router-view>
-    </div>
+    </main>
 </template>
 
 <script>
@@ -10,7 +10,6 @@
         
         data(){
             return {
-
             }
         }
     }
