@@ -11916,73 +11916,70 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     };
   },
   methods: {
-    getAccount: function getAccount(id) {
-      var _this = this;
-
-      this.id = id;
-      this.axios.get('api/twofaccounts/' + this.id).then(
+    getAccount: function () {
+      var _getAccount = _asyncToGenerator(
       /*#__PURE__*/
-      function () {
-        var _ref = _asyncToGenerator(
-        /*#__PURE__*/
-        _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(response) {
-          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
-            while (1) {
-              switch (_context.prev = _context.next) {
-                case 0:
-                  _this.service = response.data.service;
-                  _this.account = response.data.account;
-                  _this.icon = response.data.icon;
-                  _this.type = response.data.type;
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(id) {
+        var _ref, data;
 
-                  if (!(_this.type === 'totp')) {
-                    _context.next = 9;
-                    break;
-                  }
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                this.id = id;
+                _context.next = 3;
+                return this.axios.get('api/twofaccounts/' + this.id);
 
-                  _context.next = 7;
-                  return _this.getTOTP();
+              case 3:
+                _ref = _context.sent;
+                data = _ref.data;
+                this.service = data.service;
+                this.account = data.account;
+                this.icon = data.icon;
+                this.type = data.type;
 
-                case 7:
-                  _context.next = 11;
+                if (!(this.type === 'totp')) {
+                  _context.next = 14;
                   break;
+                }
 
-                case 9:
-                  _context.next = 11;
-                  return _this.getHOTP();
+                _context.next = 12;
+                return this.getTOTP();
 
-                case 11:
-                  _this.$parent.isActive = true;
+              case 12:
+                _context.next = 16;
+                break;
 
-                case 12:
-                case "end":
-                  return _context.stop();
-              }
+              case 14:
+                _context.next = 16;
+                return this.getHOTP();
+
+              case 16:
+                this.$parent.isActive = true;
+
+              case 17:
+              case "end":
+                return _context.stop();
             }
-          }, _callee);
-        }));
-
-        return function (_x) {
-          return _ref.apply(this, arguments);
-        };
-      }())["catch"](function (error) {
-        _this.$router.push({
-          name: 'genericError',
-          params: {
-            err: error.response
           }
-        });
-      });
-    },
+        }, _callee, this);
+      }));
+
+      function getAccount(_x) {
+        return _getAccount.apply(this, arguments);
+      }
+
+      return getAccount;
+    }(),
     getTOTP: function getTOTP() {
-      var _this2 = this;
+      var _this = this;
 
       this.axios.get('api/twofaccounts/' + this.id + '/otp').then(function (response) {
         var spacePosition = Math.ceil(response.data.otp.length / 2);
-        _this2.otp = response.data.otp.substr(0, spacePosition) + " " + response.data.otp.substr(spacePosition);
-        _this2.position = response.data.position;
+        _this.otp = response.data.otp.substr(0, spacePosition) + " " + response.data.otp.substr(spacePosition);
+        _this.position = response.data.position;
 
-        var dots = _this2.$el.querySelector('.dots'); // clear active dots
+        var dots = _this.$el.querySelector('.dots'); // clear active dots
 
 
         while (dots.querySelector('[data-is-active]')) {
@@ -11990,10 +11987,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         } // set dot at given position as the active one
 
 
-        var active = dots.querySelector('li:nth-child(' + (_this2.position + 1) + ')');
+        var active = dots.querySelector('li:nth-child(' + (_this.position + 1) + ')');
         active.setAttribute('data-is-active', true);
-        var self = _this2;
-        _this2.timerID = setInterval(function () {
+        var self = _this;
+        _this.timerID = setInterval(function () {
           var sibling = active.nextSibling;
 
           if (active.nextSibling === null) {
@@ -12009,12 +12006,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       });
     },
     getHOTP: function getHOTP() {
-      var _this3 = this;
+      var _this2 = this;
 
       this.axios.get('api/twofaccounts/' + this.id + '/otp').then(function (response) {
         var spacePosition = Math.ceil(response.data.otp.length / 2);
-        _this3.otp = response.data.otp.substr(0, spacePosition) + " " + response.data.otp.substr(spacePosition);
-        _this3.counter = response.data.counter;
+        _this2.otp = response.data.otp.substr(0, spacePosition) + " " + response.data.otp.substr(spacePosition);
+        _this2.counter = response.data.counter;
       });
     },
     clearOTP: function clearOTP() {
@@ -12147,12 +12144,29 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       accounts: [],
+      selectedAccounts: [],
       ShowTwofaccountInModal: false,
       search: '',
       username: null,
@@ -12171,22 +12185,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     }
   },
   props: ['InitialEditMode'],
-  mounted: function mounted() {
-    var _this2 = this;
-
+  created: function created() {
     this.username = localStorage.getItem('user');
-    this.axios.get('api/twofaccounts').then(function (response) {
-      response.data.forEach(function (data) {
-        _this2.accounts.push({
-          id: data.id,
-          service: data.service,
-          account: data.account ? data.account : '-',
-          icon: data.icon
-        });
-      });
-      _this2.showAccounts = _this2.accounts.length > 0 ? true : false;
-      _this2.showNoAccount = !_this2.showAccounts;
-    }); // stop OTP generation on modal close
+    this.fetchAccounts(); // stop OTP generation on modal close
 
     this.$on('modalClose', function () {
       console.log('modalClose triggered');
@@ -12198,6 +12199,24 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     TwofaccountShow: _components_TwofaccountShow__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
   methods: {
+    fetchAccounts: function fetchAccounts() {
+      var _this2 = this;
+
+      this.accounts = [];
+      this.selectedAccounts = [];
+      this.axios.get('api/twofaccounts').then(function (response) {
+        response.data.forEach(function (data) {
+          _this2.accounts.push({
+            id: data.id,
+            service: data.service,
+            account: data.account ? data.account : '-',
+            icon: data.icon
+          });
+        });
+        _this2.showAccounts = _this2.accounts.length > 0 ? true : false;
+        _this2.showNoAccount = !_this2.showAccounts;
+      });
+    },
     showAccount: function showAccount(id) {
       if (id) {
         this.$refs.TwofaccountShow.getAccount(id);
@@ -12213,28 +12232,72 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     },
     deleteAccount: function deleteAccount(id) {
       if (confirm(this.$t('twofaccounts.confirm.delete'))) {
-        this.axios["delete"]('/api/twofaccounts/' + id);
-        this.accounts.splice(this.accounts.findIndex(function (x) {
-          return x.id === id;
-        }), 1);
+        this.axios["delete"]('/api/twofaccounts/' + id); // Remove the deleted account from the collection
+
+        this.accounts = this.accounts.filter(function (a) {
+          return a.id !== id;
+        });
         this.showAccounts = this.accounts.length > 0 ? true : false;
         this.showNoAccount = !this.showAccounts;
       }
     },
-    logout: function () {
-      var _logout = _asyncToGenerator(
+    destroyAccounts: function () {
+      var _destroyAccounts = _asyncToGenerator(
       /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(evt) {
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
+        var ids;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                if (!confirm(this.$t('auth.confirm.logout'))) {
-                  _context.next = 7;
+                if (!confirm(this.$t('twofaccounts.confirm.delete'))) {
+                  _context.next = 6;
                   break;
                 }
 
-                _context.next = 3;
+                ids = [];
+                this.selectedAccounts.forEach(function (account) {
+                  return ids.push(account.id);
+                }); // Backend will delete all accounts at the same time
+
+                _context.next = 5;
+                return this.axios["delete"]('/api/twofaccounts/batch', {
+                  data: ids
+                });
+
+              case 5:
+                // we fetch the accounts again to prevent the js collection being
+                // desynchronize from the backend php collection
+                this.fetchAccounts();
+
+              case 6:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function destroyAccounts() {
+        return _destroyAccounts.apply(this, arguments);
+      }
+
+      return destroyAccounts;
+    }(),
+    logout: function () {
+      var _logout = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2(evt) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                if (!confirm(this.$t('auth.confirm.logout'))) {
+                  _context2.next = 7;
+                  break;
+                }
+
+                _context2.next = 3;
                 return this.axios.get('api/logout');
 
               case 3:
@@ -12245,10 +12308,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 7:
               case "end":
-                return _context.stop();
+                return _context2.stop();
             }
           }
-        }, _callee, this);
+        }, _callee2, this);
       }));
 
       function logout(_x) {
@@ -12256,7 +12319,15 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }
 
       return logout;
-    }()
+    }(),
+    setEditModeTo: function setEditModeTo(state) {
+      if (state === false) {
+        this.selectedAccounts = [];
+      }
+
+      this.editMode = state;
+      this.$parent.showToolbar = state;
+    }
   },
   beforeRouteEnter: function beforeRouteEnter(to, from, next) {
     if (!localStorage.getItem('jwt')) {
@@ -16687,7 +16758,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "main-section" }, [_c("router-view")], 1)
+  return _c("main", { staticClass: "main-section" }, [_c("router-view")], 1)
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -16859,7 +16930,8 @@ var render = function() {
               _c(
                 "div",
                 {
-                  staticClass: "box has-text-centered has-background-black-ter "
+                  staticClass:
+                    "box has-text-centered has-background-black-ter is-shadowless"
                 },
                 [_vm._t("default")],
                 2
@@ -17002,55 +17074,96 @@ var render = function() {
                       "column is-three-quarters-mobile is-one-third-tablet is-one-quarter-desktop is-one-quarter-widescreen is-one-quarter-fullhd"
                   },
                   [
-                    _c("div", { staticClass: "field" }, [
-                      _c("div", { staticClass: "control has-icons-right" }, [
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.search,
-                              expression: "search"
-                            }
-                          ],
-                          staticClass: "input is-rounded is-search",
-                          attrs: { type: "text" },
-                          domProps: { value: _vm.search },
-                          on: {
-                            input: function($event) {
-                              if ($event.target.composing) {
-                                return
-                              }
-                              _vm.search = $event.target.value
-                            }
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c(
-                          "span",
-                          { staticClass: "icon is-small is-right" },
+                    _vm.editMode
+                      ? _c(
+                          "div",
+                          { staticClass: "toolbar has-text-centered" },
                           [
-                            !_vm.search
-                              ? _c("font-awesome-icon", {
-                                  attrs: { icon: ["fas", "search"] }
-                                })
-                              : _vm._e(),
-                            _vm._v(" "),
-                            _vm.search
-                              ? _c("a", {
-                                  staticClass: "delete",
-                                  on: {
-                                    click: function($event) {
-                                      _vm.search = ""
-                                    }
-                                  }
-                                })
-                              : _vm._e()
-                          ],
-                          1
+                            _c(
+                              "a",
+                              {
+                                staticClass: "button",
+                                class: {
+                                  "is-dark": _vm.selectedAccounts.length === 0,
+                                  "is-danger": _vm.selectedAccounts.length > 0
+                                },
+                                attrs: {
+                                  disabled: _vm.selectedAccounts.length == 0
+                                },
+                                on: { click: _vm.destroyAccounts }
+                              },
+                              [
+                                _c(
+                                  "span",
+                                  { staticClass: "icon is-small" },
+                                  [
+                                    _c("font-awesome-icon", {
+                                      attrs: { icon: ["fas", "trash"] }
+                                    })
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c("span", [
+                                  _vm._v(_vm._s(_vm.$t("commons.delete")))
+                                ])
+                              ]
+                            )
+                          ]
                         )
-                      ])
-                    ])
+                      : _c("div", { staticClass: "field" }, [
+                          _c(
+                            "div",
+                            { staticClass: "control has-icons-right" },
+                            [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: _vm.search,
+                                    expression: "search"
+                                  }
+                                ],
+                                staticClass: "input is-rounded is-search",
+                                attrs: { type: "text" },
+                                domProps: { value: _vm.search },
+                                on: {
+                                  input: function($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.search = $event.target.value
+                                  }
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c(
+                                "span",
+                                { staticClass: "icon is-small is-right" },
+                                [
+                                  !_vm.search
+                                    ? _c("font-awesome-icon", {
+                                        attrs: { icon: ["fas", "search"] }
+                                      })
+                                    : _vm._e(),
+                                  _vm._v(" "),
+                                  _vm.search
+                                    ? _c("a", {
+                                        staticClass: "delete",
+                                        on: {
+                                          click: function($event) {
+                                            _vm.search = ""
+                                          }
+                                        }
+                                      })
+                                    : _vm._e()
+                                ],
+                                1
+                              )
+                            ]
+                          )
+                        ])
                   ]
                 )
               ]
@@ -17058,87 +17171,138 @@ var render = function() {
             _vm._v(" "),
             _c(
               "div",
-              { staticClass: "columns is-multiline is-centered is-gapless" },
+              { staticClass: "accounts columns is-multiline is-centered" },
               _vm._l(_vm.filteredAccounts, function(account) {
-                return _c("div", { staticClass: "column is-narrow" }, [
-                  _c(
-                    "div",
-                    {
-                      staticClass: "tfa has-text-white is-size-3 has-ellipsis",
-                      on: {
-                        click: function($event) {
-                          $event.stopPropagation()
-                          return _vm.showAccount(account.id)
-                        }
-                      }
-                    },
-                    [
-                      account.icon
-                        ? _c("img", {
-                            attrs: { src: "/storage/icons/" + account.icon }
-                          })
+                return _c(
+                  "div",
+                  { staticClass: "tfa column is-narrow has-text-white" },
+                  [
+                    _c("div", { staticClass: "tfa-container" }, [
+                      _vm.editMode
+                        ? _c("div", { staticClass: "tfa-checkbox" }, [
+                            _c("div", { staticClass: "field" }, [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: _vm.selectedAccounts,
+                                    expression: "selectedAccounts"
+                                  }
+                                ],
+                                staticClass: "is-checkradio is-small is-white",
+                                attrs: {
+                                  id: "ckb_" + account.id,
+                                  type: "checkbox",
+                                  name: "ckb_" + account.id
+                                },
+                                domProps: {
+                                  value: account,
+                                  checked: Array.isArray(_vm.selectedAccounts)
+                                    ? _vm._i(_vm.selectedAccounts, account) > -1
+                                    : _vm.selectedAccounts
+                                },
+                                on: {
+                                  change: function($event) {
+                                    var $$a = _vm.selectedAccounts,
+                                      $$el = $event.target,
+                                      $$c = $$el.checked ? true : false
+                                    if (Array.isArray($$a)) {
+                                      var $$v = account,
+                                        $$i = _vm._i($$a, $$v)
+                                      if ($$el.checked) {
+                                        $$i < 0 &&
+                                          (_vm.selectedAccounts = $$a.concat([
+                                            $$v
+                                          ]))
+                                      } else {
+                                        $$i > -1 &&
+                                          (_vm.selectedAccounts = $$a
+                                            .slice(0, $$i)
+                                            .concat($$a.slice($$i + 1)))
+                                      }
+                                    } else {
+                                      _vm.selectedAccounts = $$c
+                                    }
+                                  }
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c("label", {
+                                attrs: { for: "ckb_" + account.id }
+                              })
+                            ])
+                          ])
                         : _vm._e(),
-                      _vm._v(
-                        "\n                    " +
-                          _vm._s(account.service) +
-                          "\n                    "
-                      ),
+                      _vm._v(" "),
                       _c(
-                        "span",
+                        "div",
                         {
-                          staticClass:
-                            "is-family-primary is-size-6 has-text-grey "
+                          staticClass: "tfa-content is-size-3 is-size-4-mobile",
+                          on: {
+                            click: function($event) {
+                              $event.stopPropagation()
+                              return _vm.showAccount(account.id)
+                            }
+                          }
                         },
-                        [_vm._v(_vm._s(account.account))]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _vm.editMode
-                    ? _c(
-                        "span",
                         [
-                          _c(
-                            "router-link",
-                            {
-                              staticClass: "tag is-dark",
-                              attrs: {
-                                to: {
-                                  name: "edit",
-                                  params: { twofaccountId: account.id }
-                                }
-                              }
-                            },
+                          _c("div", { staticClass: "tfa-text has-ellipsis" }, [
+                            account.icon
+                              ? _c("img", {
+                                  attrs: {
+                                    src: "/storage/icons/" + account.icon
+                                  }
+                                })
+                              : _vm._e(),
+                            _vm._v(
+                              "\n                            " +
+                                _vm._s(account.service) +
+                                "\n                            "
+                            ),
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "is-family-primary is-size-6 is-size-7-mobile has-text-grey "
+                              },
+                              [_vm._v(_vm._s(account.account))]
+                            )
+                          ])
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _vm.editMode
+                        ? _c(
+                            "div",
+                            { staticClass: "tfa-dots has-text-grey" },
                             [
-                              _c("font-awesome-icon", {
-                                attrs: { icon: ["fas", "edit"] }
-                              })
-                            ],
-                            1
-                          ),
-                          _vm._v(" "),
-                          _c(
-                            "a",
-                            {
-                              staticClass: "tag is-dark",
-                              on: {
-                                click: function($event) {
-                                  return _vm.deleteAccount(account.id)
-                                }
-                              }
-                            },
-                            [
-                              _c("font-awesome-icon", {
-                                attrs: { icon: ["fas", "trash"] }
-                              })
+                              _c(
+                                "router-link",
+                                {
+                                  staticClass: "tag is-dark is-rounded",
+                                  attrs: {
+                                    to: {
+                                      name: "edit",
+                                      params: { twofaccountId: account.id }
+                                    }
+                                  }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                            " +
+                                      _vm._s(_vm.$t("commons.edit")) +
+                                      "\n                        "
+                                  )
+                                ]
+                              )
                             ],
                             1
                           )
-                        ],
-                        1
-                      )
-                    : _vm._e()
-                ])
+                        : _vm._e()
+                    ])
+                  ]
+                )
               }),
               0
             )
@@ -17242,7 +17406,7 @@ var render = function() {
                             staticClass: "button is-dark is-rounded",
                             on: {
                               click: function($event) {
-                                _vm.editMode = true
+                                return _vm.setEditModeTo(true)
                               }
                             }
                           },
@@ -17254,11 +17418,10 @@ var render = function() {
                       ? _c(
                           "a",
                           {
-                            staticClass:
-                              "button is-success is-rounded is-medium",
+                            staticClass: "button is-success is-rounded",
                             on: {
                               click: function($event) {
-                                _vm.editMode = false
+                                return _vm.setEditModeTo(false)
                               }
                             }
                           },
@@ -35501,7 +35664,9 @@ __webpack_require__.r(__webpack_exports__);
       "cancel": "Cancel",
       "update": "Update",
       "copy_to_clipboard": "Copy to clipboard",
-      "profile": "Profile"
+      "profile": "Profile",
+      "edit": "Edit",
+      "delete": "Delete"
     },
     "errors": {
       "resource_not_found": "Resource not found",
@@ -35733,7 +35898,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-_fortawesome_fontawesome_svg_core__WEBPACK_IMPORTED_MODULE_1__["library"].add(_fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faPlus"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faQrcode"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faImage"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faTrash"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faEdit"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faCheck"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faLock"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faLockOpen"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faSearch"]);
+_fortawesome_fontawesome_svg_core__WEBPACK_IMPORTED_MODULE_1__["library"].add(_fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faPlus"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faQrcode"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faImage"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faTrash"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faEdit"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faCheck"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faLock"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faLockOpen"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faSearch"], _fortawesome_free_solid_svg_icons__WEBPACK_IMPORTED_MODULE_3__["faEllipsisH"]);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('font-awesome-icon', _fortawesome_vue_fontawesome__WEBPACK_IMPORTED_MODULE_2__["FontAwesomeIcon"]);
 
 /***/ }),

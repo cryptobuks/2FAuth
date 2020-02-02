@@ -130,7 +130,9 @@ __webpack_require__.r(__webpack_exports__);
       "cancel": "Cancel",
       "update": "Update",
       "copy_to_clipboard": "Copy to clipboard",
-      "profile": "Profile"
+      "profile": "Profile",
+      "edit": "Edit",
+      "delete": "Delete"
     },
     "errors": {
       "resource_not_found": "Resource not found",
