@@ -11905,9 +11905,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   data: function data() {
     return {
       id: null,
-      service: '',
-      account: '',
-      icon: '',
+      internal_service: '',
+      internal_account: '',
+      internal_uri: '',
+      next_uri: '',
+      internal_icon: '',
       type: '',
       otp: '',
       timerID: null,
@@ -11915,9 +11917,18 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       counter: null
     };
   },
+  props: {
+    service: '',
+    account: '',
+    uri: '',
+    icon: ''
+  },
+  mounted: function mounted() {
+    this.showAccount();
+  },
   methods: {
-    getAccount: function () {
-      var _getAccount = _asyncToGenerator(
+    showAccount: function () {
+      var _showAccount = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(id) {
         var _ref, data;
@@ -11926,38 +11937,65 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
+                // 2 possible cases :
+                //   - ID is provided so we fetch the account data from db but without the uri.
+                //     This prevent the uri (a sensitive data) to transit via http request unnecessarily. In this
+                //     case this.type is sent by the backend.
+                //   - the URI prop has been set via the create form, we need to preview some OTP before storing the account.
+                //     So this.type is set on client side from the provided URI
                 this.id = id;
-                _context.next = 3;
-                return this.axios.get('api/twofaccounts/' + this.id);
 
-              case 3:
-                _ref = _context.sent;
-                data = _ref.data;
-                this.service = data.service;
-                this.account = data.account;
-                this.icon = data.icon;
-                this.type = data.type;
-
-                if (!(this.type === 'totp')) {
-                  _context.next = 14;
+                if (!(this.id || this.uri)) {
+                  _context.next = 26;
                   break;
                 }
 
-                _context.next = 12;
-                return this.getTOTP();
+                if (!this.id) {
+                  _context.next = 13;
+                  break;
+                }
 
-              case 12:
-                _context.next = 16;
+                _context.next = 5;
+                return this.axios.get('api/twofaccounts/' + this.id);
+
+              case 5:
+                _ref = _context.sent;
+                data = _ref.data;
+                this.internal_service = data.service;
+                this.internal_account = data.account;
+                this.internal_icon = data.icon;
+                this.type = data.type;
+                _context.next = 18;
                 break;
 
-              case 14:
-                _context.next = 16;
+              case 13:
+                this.internal_service = this.service;
+                this.internal_account = this.account;
+                this.internal_icon = this.icon;
+                this.internal_uri = this.uri;
+                this.type = this.internal_uri.slice(0, 15) === "otpauth://totp/" ? 'totp' : 'hotp';
+
+              case 18:
+                if (!(this.type === 'totp')) {
+                  _context.next = 23;
+                  break;
+                }
+
+                _context.next = 21;
+                return this.getTOTP();
+
+              case 21:
+                _context.next = 25;
+                break;
+
+              case 23:
+                _context.next = 25;
                 return this.getHOTP();
 
-              case 16:
+              case 25:
                 this.$parent.isActive = true;
 
-              case 17:
+              case 26:
               case "end":
                 return _context.stop();
             }
@@ -11965,16 +12003,18 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee, this);
       }));
 
-      function getAccount(_x) {
-        return _getAccount.apply(this, arguments);
+      function showAccount(_x) {
+        return _showAccount.apply(this, arguments);
       }
 
-      return getAccount;
+      return showAccount;
     }(),
     getTOTP: function getTOTP() {
       var _this = this;
 
-      this.axios.get('api/twofaccounts/' + this.id + '/otp').then(function (response) {
+      this.axios.post('api/twofaccounts/otp', {
+        data: this.id ? this.id : this.internal_uri
+      }).then(function (response) {
         var spacePosition = Math.ceil(response.data.otp.length / 2);
         _this.otp = response.data.otp.substr(0, spacePosition) + " " + response.data.otp.substr(spacePosition);
         _this.position = response.data.position;
@@ -12008,22 +12048,31 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     getHOTP: function getHOTP() {
       var _this2 = this;
 
-      this.axios.get('api/twofaccounts/' + this.id + '/otp').then(function (response) {
+      this.axios.post('api/twofaccounts/otp', {
+        data: this.id ? this.id : this.internal_uri
+      }).then(function (response) {
         var spacePosition = Math.ceil(response.data.otp.length / 2);
         _this2.otp = response.data.otp.substr(0, spacePosition) + " " + response.data.otp.substr(spacePosition);
         _this2.counter = response.data.counter;
+        _this2.next_uri = response.data.nextUri;
       });
     },
     clearOTP: function clearOTP() {
       this.stopLoop();
       this.id = this.timerID = this.position = this.counter = null;
-      this.service = this.account = this.icon = this.type = '';
+      this.internal_service = this.internal_account = this.internal_icon = this.internal_uri = '';
       this.otp = '... ...';
-      this.$el.querySelector('[data-is-active]').removeAttribute('data-is-active');
-      this.$el.querySelector('.dots li:first-child').setAttribute('data-is-active', true);
+
+      try {
+        this.$el.querySelector('[data-is-active]').removeAttribute('data-is-active');
+        this.$el.querySelector('.dots li:first-child').setAttribute('data-is-active', true);
+      } catch (e) {// we do not throw anything
+      }
     },
     stopLoop: function stopLoop() {
-      clearInterval(this.timerID);
+      if (this.type === 'totp') {
+        clearInterval(this.timerID);
+      }
     },
     clipboardSuccessHandler: function clipboardSuccessHandler(_ref2) {
       var value = _ref2.value,
@@ -12056,6 +12105,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _components_Modal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/Modal */ "./resources/js/components/Modal.vue");
 /* harmony import */ var _components_TwofaccountShow__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../components/TwofaccountShow */ "./resources/js/components/TwofaccountShow.vue");
+/* harmony import */ var _components_Form__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../components/Form */ "./resources/js/components/Form.js");
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -12160,6 +12210,37 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -12171,8 +12252,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       search: '',
       username: null,
       editMode: this.InitialEditMode,
-      showAccounts: null,
-      showNoAccount: null
+      QuickFormIsVisible: false,
+      form: new _components_Form__WEBPACK_IMPORTED_MODULE_3__["default"]({
+        qrcode: null
+      }),
+      axiosIsComplete: null
     };
   },
   computed: {
@@ -12182,6 +12266,17 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       return this.accounts.filter(function (item) {
         return item.service.toLowerCase().includes(_this.search.toLowerCase()) || item.account.toLowerCase().includes(_this.search.toLowerCase());
       });
+    },
+    showAccounts: function showAccounts() {
+      return this.accounts.length > 0 && !this.QuickFormIsVisible ? true : false;
+    },
+    showQuickForm: {
+      get: function get() {
+        return (this.QuickFormIsVisible || this.accounts.length === 0) && this.axiosIsComplete;
+      },
+      set: function set(value) {
+        this.QuickFormIsVisible = value;
+      }
     }
   },
   props: ['InitialEditMode'],
@@ -12199,6 +12294,45 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     TwofaccountShow: _components_TwofaccountShow__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
   methods: {
+    uploadQrcode: function () {
+      var _uploadQrcode = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(event) {
+        var imgdata, _ref, data;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                imgdata = new FormData();
+                imgdata.append('qrcode', this.$refs.qrcodeInput.files[0]);
+                _context.next = 4;
+                return this.form.upload('/api/qrcode/decode', imgdata);
+
+              case 4:
+                _ref = _context.sent;
+                data = _ref.data;
+                this.$router.push({
+                  name: 'create',
+                  params: {
+                    qrAccount: data
+                  }
+                });
+
+              case 7:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function uploadQrcode(_x) {
+        return _uploadQrcode.apply(this, arguments);
+      }
+
+      return uploadQrcode;
+    }(),
     fetchAccounts: function fetchAccounts() {
       var _this2 = this;
 
@@ -12213,21 +12347,21 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             icon: data.icon
           });
         });
-        _this2.showAccounts = _this2.accounts.length > 0 ? true : false;
-        _this2.showNoAccount = !_this2.showAccounts;
+        _this2.axiosIsComplete = true;
       });
     },
-    showAccount: function showAccount(id) {
-      if (id) {
-        this.$refs.TwofaccountShow.getAccount(id);
-      } else {
-        var err = new Error("Id missing");
-        this.$router.push({
-          name: 'genericError',
-          params: {
-            err: err
+    showAccount: function showAccount(account) {
+      if (this.editMode) {
+        for (var i = 0; i < this.selectedAccounts.length; i++) {
+          if (this.selectedAccounts[i] === account.id) {
+            this.selectedAccounts.splice(i, 1);
+            return;
           }
-        });
+        }
+
+        this.selectedAccounts.push(account.id);
+      } else {
+        this.$refs.TwofaccountShow.showAccount(account.id);
       }
     },
     deleteAccount: function deleteAccount(id) {
@@ -12237,30 +12371,28 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         this.accounts = this.accounts.filter(function (a) {
           return a.id !== id;
         });
-        this.showAccounts = this.accounts.length > 0 ? true : false;
-        this.showNoAccount = !this.showAccounts;
       }
     },
     destroyAccounts: function () {
       var _destroyAccounts = _asyncToGenerator(
       /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
         var ids;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
           while (1) {
-            switch (_context.prev = _context.next) {
+            switch (_context2.prev = _context2.next) {
               case 0:
                 if (!confirm(this.$t('twofaccounts.confirm.delete'))) {
-                  _context.next = 6;
+                  _context2.next = 6;
                   break;
                 }
 
                 ids = [];
-                this.selectedAccounts.forEach(function (account) {
-                  return ids.push(account.id);
+                this.selectedAccounts.forEach(function (id) {
+                  return ids.push(id);
                 }); // Backend will delete all accounts at the same time
 
-                _context.next = 5;
+                _context2.next = 5;
                 return this.axios["delete"]('/api/twofaccounts/batch', {
                   data: ids
                 });
@@ -12272,10 +12404,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 6:
               case "end":
-                return _context.stop();
+                return _context2.stop();
             }
           }
-        }, _callee, this);
+        }, _callee2, this);
       }));
 
       function destroyAccounts() {
@@ -12287,17 +12419,17 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     logout: function () {
       var _logout = _asyncToGenerator(
       /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2(evt) {
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3(evt) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
                 if (!confirm(this.$t('auth.confirm.logout'))) {
-                  _context2.next = 7;
+                  _context3.next = 7;
                   break;
                 }
 
-                _context2.next = 3;
+                _context3.next = 3;
                 return this.axios.get('api/logout');
 
               case 3:
@@ -12308,13 +12440,13 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 7:
               case "end":
-                return _context2.stop();
+                return _context3.stop();
             }
           }
-        }, _callee2, this);
+        }, _callee3, this);
       }));
 
-      function logout(_x) {
+      function logout(_x2) {
         return _logout.apply(this, arguments);
       }
 
@@ -12323,10 +12455,16 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     setEditModeTo: function setEditModeTo(state) {
       if (state === false) {
         this.selectedAccounts = [];
+      } else {
+        this.search = '';
       }
 
       this.editMode = state;
       this.$parent.showToolbar = state;
+    },
+    cancelQuickForm: function cancelQuickForm() {
+      this.form.clear();
+      this.showQuickForm = false;
     }
   },
   beforeRouteEnter: function beforeRouteEnter(to, from, next) {
@@ -13071,7 +13209,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _components_Form__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../../components/Form */ "./resources/js/components/Form.js");
+/* harmony import */ var _components_Modal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../components/Modal */ "./resources/js/components/Modal.vue");
+/* harmony import */ var _components_Form__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./../../components/Form */ "./resources/js/components/Form.js");
+/* harmony import */ var _components_TwofaccountShow__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../components/TwofaccountShow */ "./resources/js/components/TwofaccountShow.vue");
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -13163,13 +13303,61 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
+      isQuickForm: false,
+      ShowTwofaccountInModal: false,
       uriIsLocked: true,
       tempIcon: '',
-      form: new _components_Form__WEBPACK_IMPORTED_MODULE_1__["default"]({
+      form: new _components_Form__WEBPACK_IMPORTED_MODULE_2__["default"]({
         service: '',
         account: '',
         uri: '',
@@ -13177,6 +13365,28 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         qrcode: null
       })
     };
+  },
+  watch: {
+    tempIcon: function tempIcon(val) {
+      if (this.isQuickForm) {
+        this.$refs.TwofaccountShow.internal_icon = val;
+      }
+    }
+  },
+  mounted: function mounted() {
+    if (this.$route.params.qrAccount) {
+      this.isQuickForm = true;
+      this.form.fill(this.$route.params.qrAccount);
+    } // stop TOTP generation on modal close
+
+
+    this.$on('modalClose', function () {
+      this.$refs.TwofaccountPreview.stopLoop();
+    });
+  },
+  components: {
+    Modal: _components_Modal__WEBPACK_IMPORTED_MODULE_1__["default"],
+    TwofaccountShow: _components_TwofaccountShow__WEBPACK_IMPORTED_MODULE_3__["default"]
   },
   methods: {
     createAccount: function () {
@@ -13188,11 +13398,21 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             switch (_context.prev = _context.next) {
               case 0:
                 // set current temp icon as account icon
-                this.form.icon = this.tempIcon;
-                _context.next = 3;
+                this.form.icon = this.tempIcon; // The quick form (possibly the preview feature too) has incremented the HOTP counter so the next_uri property
+                // must be used as the uri to store
+                // This could desynchronized the HOTP verification server and our local counter if the user never verified the HOTP but this
+                // is acceptable (and HOTP counter can be edited by the way)
+
+                if (this.isQuickForm && this.$refs.TwofaccountShow.next_uri) {
+                  this.form.uri = this.$refs.TwofaccountShow.next_uri;
+                } else if (this.$refs.TwofaccountPreview && this.$refs.TwofaccountPreview.next_uri) {
+                  this.form.uri = this.$refs.TwofaccountPreview.next_uri;
+                }
+
+                _context.next = 4;
                 return this.form.post('/api/twofaccounts');
 
-              case 3:
+              case 4:
                 if (this.form.errors.any() === false) {
                   this.$router.push({
                     name: 'accounts',
@@ -13202,7 +13422,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   });
                 }
 
-              case 4:
+              case 5:
               case "end":
                 return _context.stop();
             }
@@ -13216,8 +13436,20 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
       return createAccount;
     }(),
+    previewAccount: function previewAccount() {
+      // preview is possible only if we have an uri
+      if (this.form.uri) {
+        this.$refs.TwofaccountPreview.showAccount();
+      }
+    },
     cancelCreation: function cancelCreation() {
-      // clean possible uploaded temp icon
+      if (this.form.service && this.form.uri) {
+        if (confirm(this.$t('twofaccounts.confirm.cancel')) === false) {
+          return;
+        }
+      } // clean possible uploaded temp icon
+
+
       this.deleteIcon();
       this.$router.push({
         name: 'accounts',
@@ -16977,23 +17209,26 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
-    _vm.icon
-      ? _c(
-          "figure",
-          {
-            staticClass: "image is-64x64",
-            staticStyle: { display: "inline-block" }
-          },
-          [_c("img", { attrs: { src: "storage/icons/" + _vm.icon } })]
-        )
-      : _vm._e(),
+    _c(
+      "figure",
+      {
+        staticClass: "image is-64x64",
+        class: { "no-icon": !_vm.internal_icon },
+        staticStyle: { display: "inline-block" }
+      },
+      [
+        _vm.internal_icon
+          ? _c("img", { attrs: { src: "storage/icons/" + _vm.internal_icon } })
+          : _vm._e()
+      ]
+    ),
     _vm._v(" "),
     _c("p", { staticClass: "is-size-4 has-text-grey-light has-ellipsis" }, [
-      _vm._v(_vm._s(_vm.service))
+      _vm._v(_vm._s(_vm.internal_service))
     ]),
     _vm._v(" "),
     _c("p", { staticClass: "is-size-6 has-text-grey has-ellipsis" }, [
-      _vm._v(_vm._s(_vm.account))
+      _vm._v(_vm._s(_vm.internal_account))
     ]),
     _vm._v(" "),
     _c(
@@ -17197,9 +17432,10 @@ var render = function() {
                                   name: "ckb_" + account.id
                                 },
                                 domProps: {
-                                  value: account,
+                                  value: account.id,
                                   checked: Array.isArray(_vm.selectedAccounts)
-                                    ? _vm._i(_vm.selectedAccounts, account) > -1
+                                    ? _vm._i(_vm.selectedAccounts, account.id) >
+                                      -1
                                     : _vm.selectedAccounts
                                 },
                                 on: {
@@ -17208,7 +17444,7 @@ var render = function() {
                                       $$el = $event.target,
                                       $$c = $$el.checked ? true : false
                                     if (Array.isArray($$a)) {
-                                      var $$v = account,
+                                      var $$v = account.id,
                                         $$i = _vm._i($$a, $$v)
                                       if ($$el.checked) {
                                         $$i < 0 &&
@@ -17242,7 +17478,7 @@ var render = function() {
                           on: {
                             click: function($event) {
                               $event.stopPropagation()
-                              return _vm.showAccount(account.id)
+                              return _vm.showAccount(account)
                             }
                           }
                         },
@@ -17316,33 +17552,104 @@ var render = function() {
             {
               name: "show",
               rawName: "v-show",
-              value: this.showNoAccount,
-              expression: "this.showNoAccount"
+              value: _vm.showQuickForm,
+              expression: "showQuickForm"
             }
           ],
           staticClass: "container has-text-centered"
         },
         [
-          _c("p", { staticClass: "no-account" }),
+          _c(
+            "div",
+            {
+              staticClass: "columns is-mobile",
+              class: { "is-invisible": this.accounts.length > 0 }
+            },
+            [
+              _c("div", { staticClass: "column quickform-header" }, [
+                _vm._v(
+                  "\n                " +
+                    _vm._s(_vm.$t("twofaccounts.no_account_here"))
+                ),
+                _c("br"),
+                _vm._v(
+                  "\n                " +
+                    _vm._s(_vm.$t("twofaccounts.add_first_account")) +
+                    "\n            "
+                )
+              ])
+            ]
+          ),
           _vm._v(" "),
-          _c("p", { staticClass: "subtitle is-5 has-text-grey" }, [
-            _vm._v(
-              "\n            " +
-                _vm._s(_vm.$t("twofaccounts.no_account_here")) +
-                "\n        "
+          _c("div", { staticClass: "container" }, [
+            _c(
+              "form",
+              {
+                on: {
+                  submit: function($event) {
+                    $event.preventDefault()
+                    return _vm.createAccount($event)
+                  },
+                  keydown: function($event) {
+                    return _vm.form.onKeydown($event)
+                  }
+                }
+              },
+              [
+                _c(
+                  "div",
+                  { staticClass: "columns is-mobile no-account is-vcentered" },
+                  [
+                    _c("div", { staticClass: "column has-text-centered" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass:
+                            "button is-link is-medium is-rounded is-focused"
+                        },
+                        [
+                          _c("input", {
+                            ref: "qrcodeInput",
+                            staticClass: "file-input",
+                            attrs: { type: "file", accept: "image/*" },
+                            on: { change: _vm.uploadQrcode }
+                          }),
+                          _vm._v(
+                            "\n                            " +
+                              _vm._s(
+                                _vm.$t("twofaccounts.forms.use_qrcode.val")
+                              ) +
+                              "\n                        "
+                          )
+                        ]
+                      )
+                    ])
+                  ]
+                ),
+                _vm._v(" "),
+                _c("field-error", {
+                  attrs: { form: _vm.form, field: "qrcode" }
+                })
+              ],
+              1
             )
           ]),
           _vm._v(" "),
-          _c(
-            "router-link",
-            {
-              staticClass: "button is-medium is-link is-focused",
-              attrs: { to: { name: "create" } }
-            },
-            [_vm._v(_vm._s(_vm.$t("twofaccounts.add_one")))]
-          )
-        ],
-        1
+          _c("div", { staticClass: "columns is-mobile" }, [
+            _c(
+              "div",
+              { staticClass: "column quickform-footer" },
+              [
+                _c(
+                  "router-link",
+                  { staticClass: "is-link", attrs: { to: { name: "create" } } },
+                  [_vm._v(_vm._s(_vm.$t("twofaccounts.use_full_form")))]
+                )
+              ],
+              1
+            )
+          ])
+        ]
       ),
       _vm._v(" "),
       _c(
@@ -17365,42 +17672,41 @@ var render = function() {
           ? _c("div", { staticClass: "columns is-gapless" }, [
               _c("div", { staticClass: "column has-text-centered" }, [
                 _c("div", { staticClass: "field is-grouped" }, [
-                  !_vm.editMode
-                    ? _c(
-                        "p",
-                        { staticClass: "control" },
-                        [
-                          _c(
-                            "router-link",
-                            {
-                              staticClass: "button is-link is-rounded is-focus",
-                              attrs: { to: { name: "create" } }
-                            },
-                            [
-                              _c("span", [
-                                _vm._v(_vm._s(_vm.$t("twofaccounts.new")))
-                              ]),
-                              _vm._v(" "),
-                              _c(
-                                "span",
-                                { staticClass: "icon is-small" },
-                                [
-                                  _c("font-awesome-icon", {
-                                    attrs: { icon: ["fas", "qrcode"] }
-                                  })
-                                ],
-                                1
-                              )
-                            ]
-                          )
-                        ],
-                        1
-                      )
+                  !_vm.showQuickForm && !_vm.editMode
+                    ? _c("p", { staticClass: "control" }, [
+                        _c(
+                          "a",
+                          {
+                            staticClass: "button is-link is-rounded is-focus",
+                            on: {
+                              click: function($event) {
+                                _vm.showQuickForm = true
+                              }
+                            }
+                          },
+                          [
+                            _c("span", [
+                              _vm._v(_vm._s(_vm.$t("twofaccounts.new")))
+                            ]),
+                            _vm._v(" "),
+                            _c(
+                              "span",
+                              { staticClass: "icon is-small" },
+                              [
+                                _c("font-awesome-icon", {
+                                  attrs: { icon: ["fas", "qrcode"] }
+                                })
+                              ],
+                              1
+                            )
+                          ]
+                        )
+                      ])
                     : _vm._e(),
                   _vm._v(" "),
-                  _c("p", { staticClass: "control" }, [
-                    !_vm.editMode
-                      ? _c(
+                  !_vm.showQuickForm && !_vm.editMode
+                    ? _c("p", { staticClass: "control" }, [
+                        _c(
                           "a",
                           {
                             staticClass: "button is-dark is-rounded",
@@ -17412,10 +17718,12 @@ var render = function() {
                           },
                           [_vm._v(_vm._s(_vm.$t("twofaccounts.manage")))]
                         )
-                      : _vm._e(),
-                    _vm._v(" "),
-                    _vm.editMode
-                      ? _c(
+                      ])
+                    : _vm._e(),
+                  _vm._v(" "),
+                  !_vm.showQuickForm && _vm.editMode
+                    ? _c("p", { staticClass: "control" }, [
+                        _c(
                           "a",
                           {
                             staticClass: "button is-success is-rounded",
@@ -17442,8 +17750,27 @@ var render = function() {
                             )
                           ]
                         )
-                      : _vm._e()
-                  ])
+                      ])
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.showQuickForm
+                    ? _c("p", { staticClass: "control" }, [
+                        _c(
+                          "a",
+                          {
+                            staticClass: "button is-dark is-rounded",
+                            on: { click: _vm.cancelQuickForm }
+                          },
+                          [
+                            _vm._v(
+                              "\n                            " +
+                                _vm._s(_vm.$t("commons.cancel")) +
+                                "\n                        "
+                            )
+                          ]
+                        )
+                      ])
+                    : _vm._e()
                 ])
               ])
             ])
@@ -18766,11 +19093,8 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "form-wrapper",
-    { attrs: { title: _vm.$t("twofaccounts.forms.new_account") } },
-    [
-      _c(
+  return _vm.isQuickForm
+    ? _c(
         "form",
         {
           on: {
@@ -18784,327 +19108,482 @@ var render = function() {
           }
         },
         [
-          _c("div", { staticClass: "field" }, [
-            _c("div", { staticClass: "file is-dark is-boxed" }, [
+          _c("div", { staticClass: "container preview has-text-centered" }, [
+            _c("div", { staticClass: "columns is-mobile" }, [
               _c(
-                "label",
-                {
-                  staticClass: "file-label",
-                  attrs: {
-                    title: _vm.$t("twofaccounts.forms.use_qrcode.title")
-                  }
-                },
+                "div",
+                { staticClass: "column" },
                 [
-                  _c("input", {
-                    ref: "qrcodeInput",
-                    staticClass: "file-input",
-                    attrs: { type: "file", accept: "image/*" },
-                    on: { change: _vm.uploadQrcode }
-                  }),
+                  !_vm.tempIcon
+                    ? _c(
+                        "label",
+                        { staticClass: "add-icon-button" },
+                        [
+                          _c("input", {
+                            ref: "iconInput",
+                            staticClass: "file-input",
+                            attrs: { type: "file", accept: "image/*" },
+                            on: { change: _vm.uploadIcon }
+                          }),
+                          _vm._v(" "),
+                          _c("font-awesome-icon", {
+                            attrs: { icon: ["fas", "image"], size: "2x" }
+                          })
+                        ],
+                        1
+                      )
+                    : _vm._e(),
                   _vm._v(" "),
-                  _c("span", { staticClass: "file-cta" }, [
+                  _vm.tempIcon
+                    ? _c("button", {
+                        staticClass: "delete delete-icon-button is-medium",
+                        on: {
+                          click: function($event) {
+                            $event.preventDefault()
+                            return _vm.deleteIcon($event)
+                          }
+                        }
+                      })
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _c("twofaccount-show", {
+                    ref: "TwofaccountShow",
+                    attrs: {
+                      service: _vm.form.service,
+                      account: _vm.form.account,
+                      uri: _vm.form.uri
+                    }
+                  })
+                ],
+                1
+              )
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "columns is-mobile" }, [
+              _c("div", { staticClass: "column quickform-footer" }, [
+                _c(
+                  "div",
+                  { staticClass: "field is-grouped is-grouped-centered" },
+                  [
                     _c(
-                      "span",
-                      { staticClass: "file-icon" },
+                      "div",
+                      { staticClass: "control" },
                       [
-                        _c("font-awesome-icon", {
-                          attrs: { icon: ["fas", "qrcode"], size: "lg" }
-                        })
+                        _c(
+                          "v-button",
+                          { attrs: { isLoading: _vm.form.isBusy } },
+                          [_vm._v(_vm._s(_vm.$t("twofaccounts.forms.save")))]
+                        )
                       ],
                       1
                     ),
                     _vm._v(" "),
-                    _c("span", { staticClass: "file-label" }, [
-                      _vm._v(
-                        _vm._s(_vm.$t("twofaccounts.forms.use_qrcode.val"))
+                    _c("div", { staticClass: "control" }, [
+                      _c(
+                        "button",
+                        {
+                          staticClass: "button is-text",
+                          attrs: { type: "button" },
+                          on: { click: _vm.cancelCreation }
+                        },
+                        [_vm._v(_vm._s(_vm.$t("commons.cancel")))]
                       )
                     ])
-                  ])
-                ]
-              )
+                  ]
+                )
+              ])
             ])
-          ]),
-          _vm._v(" "),
-          _c("field-error", {
-            staticClass: "help-for-file",
-            attrs: { form: _vm.form, field: "qrcode" }
-          }),
-          _vm._v(" "),
+          ])
+        ]
+      )
+    : _c(
+        "form-wrapper",
+        { attrs: { title: _vm.$t("twofaccounts.forms.new_account") } },
+        [
           _c(
-            "div",
-            { staticClass: "field" },
-            [
-              _c("label", { staticClass: "label" }, [
-                _vm._v(_vm._s(_vm.$t("twofaccounts.service")))
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "control" }, [
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.form.service,
-                      expression: "form.service"
-                    }
-                  ],
-                  staticClass: "input",
-                  attrs: {
-                    type: "text",
-                    placeholder: _vm.$t(
-                      "twofaccounts.forms.service.placeholder"
-                    ),
-                    autofocus: ""
-                  },
-                  domProps: { value: _vm.form.service },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(_vm.form, "service", $event.target.value)
-                    }
-                  }
-                })
-              ]),
-              _vm._v(" "),
-              _c("field-error", { attrs: { form: _vm.form, field: "service" } })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c(
-            "div",
-            { staticClass: "field" },
-            [
-              _c("label", { staticClass: "label" }, [
-                _vm._v(_vm._s(_vm.$t("twofaccounts.account")))
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "control" }, [
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.form.account,
-                      expression: "form.account"
-                    }
-                  ],
-                  staticClass: "input",
-                  attrs: {
-                    type: "text",
-                    placeholder: _vm.$t(
-                      "twofaccounts.forms.account.placeholder"
-                    )
-                  },
-                  domProps: { value: _vm.form.account },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.$set(_vm.form, "account", $event.target.value)
-                    }
-                  }
-                })
-              ]),
-              _vm._v(" "),
-              _c("field-error", { attrs: { form: _vm.form, field: "account" } })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c(
-            "div",
+            "form",
             {
-              staticClass: "field",
-              staticStyle: { "margin-bottom": "0.5rem" }
+              on: {
+                submit: function($event) {
+                  $event.preventDefault()
+                  return _vm.createAccount($event)
+                },
+                keydown: function($event) {
+                  return _vm.form.onKeydown($event)
+                }
+              }
             },
             [
-              _c("label", { staticClass: "label" }, [
-                _vm._v(_vm._s(_vm.$t("twofaccounts.forms.totp_uri")))
-              ])
-            ]
-          ),
-          _vm._v(" "),
-          _c("div", { staticClass: "field has-addons" }, [
-            _c("div", { staticClass: "control is-expanded" }, [
-              _c("input", {
-                directives: [
-                  {
-                    name: "model",
-                    rawName: "v-model",
-                    value: _vm.form.uri,
-                    expression: "form.uri"
-                  }
-                ],
-                staticClass: "input",
-                attrs: {
-                  type: "text",
-                  placeholder: "otpauth://totp/...",
-                  disabled: _vm.uriIsLocked
-                },
-                domProps: { value: _vm.form.uri },
-                on: {
-                  input: function($event) {
-                    if ($event.target.composing) {
-                      return
-                    }
-                    _vm.$set(_vm.form, "uri", $event.target.value)
-                  }
-                }
-              })
-            ]),
-            _vm._v(" "),
-            _vm.uriIsLocked
-              ? _c("div", { staticClass: "control" }, [
+              _c("div", { staticClass: "field" }, [
+                _c("div", { staticClass: "file is-dark is-boxed" }, [
                   _c(
-                    "a",
+                    "label",
                     {
-                      staticClass: "button is-dark field-lock",
+                      staticClass: "file-label",
                       attrs: {
-                        title: _vm.$t("twofaccounts.forms.unlock.title")
-                      },
-                      on: {
-                        click: function($event) {
-                          _vm.uriIsLocked = false
-                        }
+                        title: _vm.$t("twofaccounts.forms.use_qrcode.title")
                       }
                     },
                     [
-                      _c(
-                        "span",
-                        { staticClass: "icon" },
-                        [
-                          _c("font-awesome-icon", {
-                            attrs: { icon: ["fas", "lock"] }
-                          })
-                        ],
-                        1
-                      )
+                      _c("input", {
+                        ref: "qrcodeInput",
+                        staticClass: "file-input",
+                        attrs: { type: "file", accept: "image/*" },
+                        on: { change: _vm.uploadQrcode }
+                      }),
+                      _vm._v(" "),
+                      _c("span", { staticClass: "file-cta" }, [
+                        _c(
+                          "span",
+                          { staticClass: "file-icon" },
+                          [
+                            _c("font-awesome-icon", {
+                              attrs: { icon: ["fas", "qrcode"], size: "lg" }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c("span", { staticClass: "file-label" }, [
+                          _vm._v(
+                            _vm._s(_vm.$t("twofaccounts.forms.use_qrcode.val"))
+                          )
+                        ])
+                      ])
                     ]
                   )
-                ])
-              : _c("div", { staticClass: "control" }, [
-                  _c(
-                    "a",
-                    {
-                      staticClass: "button is-dark field-unlock",
-                      attrs: { title: _vm.$t("twofaccounts.forms.lock.title") },
-                      on: {
-                        click: function($event) {
-                          _vm.uriIsLocked = true
-                        }
-                      }
-                    },
-                    [
-                      _c(
-                        "span",
-                        { staticClass: "icon has-text-danger" },
-                        [
-                          _c("font-awesome-icon", {
-                            attrs: { icon: ["fas", "lock-open"] }
-                          })
-                        ],
-                        1
-                      )
-                    ]
-                  )
-                ])
-          ]),
-          _vm._v(" "),
-          _c("field-error", {
-            staticClass: "help-for-file",
-            attrs: { form: _vm.form, field: "uri" }
-          }),
-          _vm._v(" "),
-          _c("div", { staticClass: "field" }, [
-            _c("label", { staticClass: "label" }, [
-              _vm._v(_vm._s(_vm.$t("twofaccounts.icon")))
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "file is-dark" }, [
-              _c("label", { staticClass: "file-label" }, [
-                _c("input", {
-                  ref: "iconInput",
-                  staticClass: "file-input",
-                  attrs: { type: "file", accept: "image/*" },
-                  on: { change: _vm.uploadIcon }
-                }),
-                _vm._v(" "),
-                _c("span", { staticClass: "file-cta" }, [
-                  _c(
-                    "span",
-                    { staticClass: "file-icon" },
-                    [
-                      _c("font-awesome-icon", {
-                        attrs: { icon: ["fas", "image"] }
-                      })
-                    ],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c("span", { staticClass: "file-label" }, [
-                    _vm._v(_vm._s(_vm.$t("twofaccounts.forms.choose_image")))
-                  ])
                 ])
               ]),
               _vm._v(" "),
-              _vm.tempIcon
-                ? _c("span", { staticClass: "tag is-black is-large" }, [
-                    _c("img", {
-                      staticClass: "icon-preview",
-                      attrs: { src: "/storage/icons/" + _vm.tempIcon }
-                    }),
-                    _vm._v(" "),
-                    _c("button", {
-                      staticClass: "delete is-small",
+              _c("field-error", {
+                staticClass: "help-for-file",
+                attrs: { form: _vm.form, field: "qrcode" }
+              }),
+              _vm._v(" "),
+              _c(
+                "div",
+                { staticClass: "field" },
+                [
+                  _c("label", { staticClass: "label" }, [
+                    _vm._v(_vm._s(_vm.$t("twofaccounts.service")))
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "control" }, [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.form.service,
+                          expression: "form.service"
+                        }
+                      ],
+                      staticClass: "input",
+                      attrs: {
+                        type: "text",
+                        placeholder: _vm.$t(
+                          "twofaccounts.forms.service.placeholder"
+                        ),
+                        autofocus: ""
+                      },
+                      domProps: { value: _vm.form.service },
                       on: {
-                        click: function($event) {
-                          $event.preventDefault()
-                          return _vm.deleteIcon($event)
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(_vm.form, "service", $event.target.value)
                         }
                       }
                     })
-                  ])
-                : _vm._e()
-            ])
-          ]),
-          _vm._v(" "),
-          _c("field-error", {
-            staticClass: "help-for-file",
-            attrs: { form: _vm.form, field: "icon" }
-          }),
-          _vm._v(" "),
-          _c("div", { staticClass: "field is-grouped" }, [
-            _c(
-              "div",
-              { staticClass: "control" },
-              [
-                _c("v-button", { attrs: { isLoading: _vm.form.isBusy } }, [
-                  _vm._v(_vm._s(_vm.$t("twofaccounts.forms.create")))
-                ])
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c("div", { staticClass: "control" }, [
+                  ]),
+                  _vm._v(" "),
+                  _c("field-error", {
+                    attrs: { form: _vm.form, field: "service" }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
               _c(
-                "button",
+                "div",
+                { staticClass: "field" },
+                [
+                  _c("label", { staticClass: "label" }, [
+                    _vm._v(_vm._s(_vm.$t("twofaccounts.account")))
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "control" }, [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.form.account,
+                          expression: "form.account"
+                        }
+                      ],
+                      staticClass: "input",
+                      attrs: {
+                        type: "text",
+                        placeholder: _vm.$t(
+                          "twofaccounts.forms.account.placeholder"
+                        )
+                      },
+                      domProps: { value: _vm.form.account },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(_vm.form, "account", $event.target.value)
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("field-error", {
+                    attrs: { form: _vm.form, field: "account" }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "div",
                 {
-                  staticClass: "button is-text",
-                  on: { click: _vm.cancelCreation }
+                  staticClass: "field",
+                  staticStyle: { "margin-bottom": "0.5rem" }
                 },
-                [_vm._v(_vm._s(_vm.$t("commons.cancel")))]
-              )
-            ])
-          ])
+                [
+                  _c("label", { staticClass: "label" }, [
+                    _vm._v(_vm._s(_vm.$t("twofaccounts.forms.otp_uri")))
+                  ])
+                ]
+              ),
+              _vm._v(" "),
+              _c("div", { staticClass: "field has-addons" }, [
+                _c("div", { staticClass: "control is-expanded" }, [
+                  _c("input", {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.form.uri,
+                        expression: "form.uri"
+                      }
+                    ],
+                    staticClass: "input",
+                    attrs: {
+                      type: "text",
+                      placeholder: "otpauth://totp/...",
+                      disabled: _vm.uriIsLocked
+                    },
+                    domProps: { value: _vm.form.uri },
+                    on: {
+                      input: function($event) {
+                        if ($event.target.composing) {
+                          return
+                        }
+                        _vm.$set(_vm.form, "uri", $event.target.value)
+                      }
+                    }
+                  })
+                ]),
+                _vm._v(" "),
+                _vm.uriIsLocked
+                  ? _c("div", { staticClass: "control" }, [
+                      _c(
+                        "a",
+                        {
+                          staticClass: "button is-dark field-lock",
+                          attrs: {
+                            title: _vm.$t("twofaccounts.forms.unlock.title")
+                          },
+                          on: {
+                            click: function($event) {
+                              _vm.uriIsLocked = false
+                            }
+                          }
+                        },
+                        [
+                          _c(
+                            "span",
+                            { staticClass: "icon" },
+                            [
+                              _c("font-awesome-icon", {
+                                attrs: { icon: ["fas", "lock"] }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      )
+                    ])
+                  : _c("div", { staticClass: "control" }, [
+                      _c(
+                        "a",
+                        {
+                          staticClass: "button is-dark field-unlock",
+                          attrs: {
+                            title: _vm.$t("twofaccounts.forms.lock.title")
+                          },
+                          on: {
+                            click: function($event) {
+                              _vm.uriIsLocked = true
+                            }
+                          }
+                        },
+                        [
+                          _c(
+                            "span",
+                            { staticClass: "icon has-text-danger" },
+                            [
+                              _c("font-awesome-icon", {
+                                attrs: { icon: ["fas", "lock-open"] }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      )
+                    ])
+              ]),
+              _vm._v(" "),
+              _c("field-error", {
+                staticClass: "help-for-file",
+                attrs: { form: _vm.form, field: "uri" }
+              }),
+              _vm._v(" "),
+              _c("div", { staticClass: "field" }, [
+                _c("label", { staticClass: "label" }, [
+                  _vm._v(_vm._s(_vm.$t("twofaccounts.icon")))
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "file is-dark" }, [
+                  _c("label", { staticClass: "file-label" }, [
+                    _c("input", {
+                      ref: "iconInput",
+                      staticClass: "file-input",
+                      attrs: { type: "file", accept: "image/*" },
+                      on: { change: _vm.uploadIcon }
+                    }),
+                    _vm._v(" "),
+                    _c("span", { staticClass: "file-cta" }, [
+                      _c(
+                        "span",
+                        { staticClass: "file-icon" },
+                        [
+                          _c("font-awesome-icon", {
+                            attrs: { icon: ["fas", "image"] }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c("span", { staticClass: "file-label" }, [
+                        _vm._v(
+                          _vm._s(_vm.$t("twofaccounts.forms.choose_image"))
+                        )
+                      ])
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _vm.tempIcon
+                    ? _c("span", { staticClass: "tag is-black is-large" }, [
+                        _c("img", {
+                          staticClass: "icon-preview",
+                          attrs: { src: "/storage/icons/" + _vm.tempIcon }
+                        }),
+                        _vm._v(" "),
+                        _c("button", {
+                          staticClass: "delete is-small",
+                          on: {
+                            click: function($event) {
+                              $event.preventDefault()
+                              return _vm.deleteIcon($event)
+                            }
+                          }
+                        })
+                      ])
+                    : _vm._e()
+                ])
+              ]),
+              _vm._v(" "),
+              _c("field-error", {
+                staticClass: "help-for-file",
+                attrs: { form: _vm.form, field: "icon" }
+              }),
+              _vm._v(" "),
+              _c("div", { staticClass: "field is-grouped" }, [
+                _c(
+                  "div",
+                  { staticClass: "control" },
+                  [
+                    _c("v-button", { attrs: { isLoading: _vm.form.isBusy } }, [
+                      _vm._v(_vm._s(_vm.$t("twofaccounts.forms.create")))
+                    ])
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _vm.form.uri
+                  ? _c("div", { staticClass: "control" }, [
+                      _c(
+                        "button",
+                        {
+                          staticClass: "button is-success",
+                          attrs: { type: "button" },
+                          on: { click: _vm.previewAccount }
+                        },
+                        [_vm._v(_vm._s(_vm.$t("twofaccounts.forms.test")))]
+                      )
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _c("div", { staticClass: "control" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "button is-text",
+                      attrs: { type: "button" },
+                      on: { click: _vm.cancelCreation }
+                    },
+                    [_vm._v(_vm._s(_vm.$t("commons.cancel")))]
+                  )
+                ])
+              ])
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "modal",
+            {
+              model: {
+                value: _vm.ShowTwofaccountInModal,
+                callback: function($$v) {
+                  _vm.ShowTwofaccountInModal = $$v
+                },
+                expression: "ShowTwofaccountInModal"
+              }
+            },
+            [
+              _c("twofaccount-show", {
+                ref: "TwofaccountPreview",
+                attrs: {
+                  service: _vm.form.service,
+                  account: _vm.form.account,
+                  uri: _vm.form.uri,
+                  icon: _vm.tempIcon
+                }
+              })
+            ],
+            1
+          )
         ],
         1
       )
-    ]
-  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -19422,6 +19901,7 @@ var render = function() {
                 "button",
                 {
                   staticClass: "button is-text",
+                  attrs: { type: "button" },
                   on: {
                     click: function($event) {
                       $event.preventDefault()
@@ -35676,7 +36156,7 @@ __webpack_require__.r(__webpack_exports__);
       "refresh": "refresh",
       "please": "Please ",
       "response": {
-        "no_valid_totp": "No valid TOTP resource in this QR code"
+        "no_valid_otp": "No valid OTP resource in this QR code"
       },
       "something_wrong_with_server": "Something is wrong with your server",
       "Unable_to_decrypt_uri": "Unable to decrypt uri",
@@ -35699,6 +36179,8 @@ __webpack_require__.r(__webpack_exports__);
       "icon": "Icon",
       "new": "New",
       "no_account_here": "No 2FA here!",
+      "add_first_account": "Add your first account",
+      "use_full_form": "Or use the full form",
       "add_one": "Add one",
       "manage": "Manage",
       "done": "Done",
@@ -35711,7 +36193,7 @@ __webpack_require__.r(__webpack_exports__);
         },
         "new_account": "New account",
         "edit_account": "Edit account",
-        "totp_uri": "TOTP Uri",
+        "otp_uri": "OTP Uri",
         "hotp_counter": "HOTP Counter",
         "use_qrcode": {
           "val": "Use a qrcode",
@@ -35727,10 +36209,12 @@ __webpack_require__.r(__webpack_exports__);
         },
         "choose_image": "Choose an image…",
         "create": "Create",
-        "save": "Save"
+        "save": "Save",
+        "test": "Test"
       },
       "confirm": {
-        "delete": "Are you sure you want to delete this account?"
+        "delete": "Are you sure you want to delete this account?",
+        "cancel": "The account will be lost. Are you sure?"
       }
     },
     "validation": {
@@ -35848,7 +36332,7 @@ __webpack_require__.r(__webpack_exports__);
           "image": "Supported format are jpeg, png, bmp, gif, svg, or webp"
         },
         "uri": {
-          "starts_with": "Only valid TOTP uri are supported"
+          "starts_with": "Only valid OTP uri are supported"
         },
         "email": {
           "exists": "No account found using this email"
