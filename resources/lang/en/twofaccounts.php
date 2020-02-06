@@ -18,6 +18,8 @@ return [
     'icon' => 'Icon',
     'new' => 'New',
     'no_account_here' => 'No 2FA here!',
+    'add_first_account' => 'Add your first account',
+    'use_full_form' => 'Or use the full form',
     'add_one' => 'Add one',
     'manage' => 'Manage',
     'done' => 'Done',
@@ -30,7 +32,7 @@ return [
         ],
         'new_account' => 'New account',
         'edit_account' => 'Edit account',
-        'totp_uri' => 'TOTP Uri',
+        'otp_uri' => 'OTP Uri',
         'hotp_counter' => 'HOTP Counter',
         'use_qrcode' => [
             'val' => 'Use a qrcode',
@@ -47,9 +49,11 @@ return [
         'choose_image' => 'Choose an image…',
         'create' => 'Create',
         'save' => 'Save',
+        'test' => 'Test',
     ],
     'confirm' => [
         'delete' => 'Are you sure you want to delete this account?',
+        'cancel' => 'The account will be lost. Are you sure?'
     ],
 
 ];

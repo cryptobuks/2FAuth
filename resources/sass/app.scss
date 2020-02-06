@@ -9,8 +9,18 @@
 @import '~bulma';
 @import '~bulma-checkradio';
 
+a:hover {
+  color: hsl(204, 86%, 53%);
+}
+
 .main-section {
-  padding: 1.5rem 1rem 8rem 1rem;
+  padding: 1.5rem 1rem 9rem 1rem;
+}
+
+@media screen and (max-width: 768px) {
+  .main-section {
+    padding-top: 0.75rem;
+  }
 }
 
 .search {
@@ -19,12 +29,6 @@
 
 .accounts {
   margin-top: 0.75rem;
-}
-
-@media screen and (max-width: 768px) {
-  .main-section {
-    padding: 0.75rem 1rem 8rem 1rem;
-  }
 }
 
 .form-column {
@@ -74,6 +78,7 @@
   display: flex;
   justify-content: left;
   flex-direction: column;
+  padding: 0 1.5rem;
 }
 
 @media screen and (max-width: 768px) {
@@ -161,6 +166,32 @@
   white-space: nowrap;
 }
 
+.add-icon-button {
+  height: 64px;
+  width: 64px;
+  padding-top: calc(32px - 1rem);
+  position: absolute;
+  margin-left: -32px;
+  z-index: 40;
+}
+
+.delete-icon-button {
+  position: absolute;
+  margin-left: 37px;
+}
+
+figure.no-icon {
+  border: 1px dashed hsl(0, 0%, 7%);
+}
+
+.file-input {
+  cursor: pointer;
+}
+
+.add-icon-button, .add-icon-button:hover {
+  color: hsl(0, 0%, 7%);
+}
+
 .dots {
   list-style: none;
   padding: 0;
@@ -239,8 +270,8 @@
 }
 
 .modal .field.is-grouped:last-child {
-  justify-content: flex-end;
-  padding-top: 20px;
+  justify-content: center;
+  padding-top: 40px;
 }
 
 footer {
@@ -278,10 +309,29 @@ footer .field.is-grouped {
   margin-bottom: 0.5rem;
 }
 
+.quickform-header {
+  height: 20vh;
+  padding-top: 2rem;
+}
+
+.quickform-footer {
+  padding-top: 3rem;
+}
+
+.preview {
+  margin-top: 20vh;
+}
+
 .no-account {
-  display: block;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
+  height: 256px;
+}
+
+.no-account::before {
+  content: "";
+  position: absolute;
+  top: 0; 
+  left: 0;
+  width: 100%; 
   opacity: 0.05;
   height: 256px;
   background-repeat: no-repeat;

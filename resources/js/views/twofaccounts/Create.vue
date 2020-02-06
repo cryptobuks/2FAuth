@@ -1,5 +1,37 @@
 <template>
-    <form-wrapper :title="$t('twofaccounts.forms.new_account')">
+    <!-- Quick form -->
+    <form @submit.prevent="createAccount" @keydown="form.onKeydown($event)" v-if="isQuickForm">
+        <div class="container preview has-text-centered">
+            <div class="columns is-mobile">
+                <div class="column">
+                    <label class="add-icon-button" v-if="!tempIcon">
+                        <input class="file-input" type="file" accept="image/*" v-on:change="uploadIcon" ref="iconInput">
+                        <font-awesome-icon :icon="['fas', 'image']" size="2x" />
+                    </label>
+                    <button class="delete delete-icon-button is-medium" v-if="tempIcon" @click.prevent="deleteIcon"></button>
+                    <twofaccount-show ref="TwofaccountShow"
+                        :service="form.service"
+                        :account="form.account"
+                        :uri="form.uri">
+                    </twofaccount-show>
+                </div>
+            </div>
+            <div class="columns is-mobile">
+                <div class="column quickform-footer">
+                    <div class="field is-grouped is-grouped-centered">
+                        <div class="control">
+                            <v-button :isLoading="form.isBusy" >{{ $t('twofaccounts.forms.save') }}</v-button>
+                        </div>
+                        <div class="control">
+                            <button type="button" class="button is-text" @click="cancelCreation">{{ $t('commons.cancel') }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <!-- Full form -->
+    <form-wrapper :title="$t('twofaccounts.forms.new_account')" v-else>
         <form @submit.prevent="createAccount" @keydown="form.onKeydown($event)">
             <div class="field">
                 <div class="file is-dark is-boxed">
@@ -30,7 +62,7 @@
                 <field-error :form="form" field="account" />
             </div>
             <div class="field" style="margin-bottom: 0.5rem;">
-                <label class="label">{{ $t('twofaccounts.forms.totp_uri') }}</label>
+                <label class="label">{{ $t('twofaccounts.forms.otp_uri') }}</label>
             </div>
             <div class="field has-addons">
                 <div class="control is-expanded">
@@ -75,21 +107,37 @@
                 <div class="control">
                     <v-button :isLoading="form.isBusy" >{{ $t('twofaccounts.forms.create') }}</v-button>
                 </div>
+                <div class="control" v-if="form.uri">
+                    <button type="button" class="button is-success" @click="previewAccount">{{ $t('twofaccounts.forms.test') }}</button>
+                </div>
                 <div class="control">
-                    <button class="button is-text" @click="cancelCreation">{{ $t('commons.cancel') }}</button>
+                    <button type="button" class="button is-text" @click="cancelCreation">{{ $t('commons.cancel') }}</button>
                 </div>
             </div>
         </form>
+        <!-- modal -->
+        <modal v-model="ShowTwofaccountInModal">
+            <twofaccount-show ref="TwofaccountPreview" 
+                :service="form.service"
+                :account="form.account"
+                :uri="form.uri"
+                :icon="tempIcon">
+            </twofaccount-show>
+        </modal>
     </form-wrapper>
 </template>
 
 <script>
 
+    import Modal from '../../components/Modal'
     import Form from './../../components/Form'
+    import TwofaccountShow from '../../components/TwofaccountShow'
 
     export default {
         data() {
             return {
+                isQuickForm: false,
+                ShowTwofaccountInModal : false,
                 uriIsLocked: true,
                 tempIcon: '',
                 form: new Form({
@@ -102,11 +150,49 @@
             }
         },
 
+        watch: {
+            tempIcon: function(val) {
+                if( this.isQuickForm ) {
+                    this.$refs.TwofaccountShow.internal_icon = val
+                }
+            },
+        },
+
+        mounted: function () {
+            if( this.$route.params.qrAccount ) {
+
+                this.isQuickForm = true
+                this.form.fill(this.$route.params.qrAccount)
+
+            }
+
+            // stop TOTP generation on modal close
+            this.$on('modalClose', function() {
+                this.$refs.TwofaccountPreview.stopLoop()
+            });
+        },
+
+        components: {
+            Modal,
+            TwofaccountShow,
+        },
+
         methods: {
 
             async createAccount() {
                 // set current temp icon as account icon
                 this.form.icon = this.tempIcon
+
+                // The quick form (possibly the preview feature too) has incremented the HOTP counter so the next_uri property
+                // must be used as the uri to store
+                // This could desynchronized the HOTP verification server and our local counter if the user never verified the HOTP but this
+                // is acceptable (and HOTP counter can be edited by the way)
+                if( this.isQuickForm && this.$refs.TwofaccountShow.next_uri ) {
+                    this.form.uri = this.$refs.TwofaccountShow.next_uri
+                }
+                else if( this.$refs.TwofaccountPreview && this.$refs.TwofaccountPreview.next_uri ) {
+                    this.form.uri = this.$refs.TwofaccountPreview.next_uri
+                }
 
                 await this.form.post('/api/twofaccounts')
 
@@ -116,7 +202,21 @@
 
             },
 
+            previewAccount() {
+                // preview is possible only if we have an uri
+                if( this.form.uri ) {
+                    this.$refs.TwofaccountPreview.showAccount()
+                }
+            },
+
             cancelCreation: function() {
+
+                if( this.form.service && this.form.uri ) {
+                    if( confirm(this.$t('twofaccounts.confirm.cancel')) === false ) {
+                        return
+                    }
+                }
+
                 // clean possible uploaded temp icon
                 this.deleteIcon()
 

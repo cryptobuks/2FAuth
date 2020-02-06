@@ -31,11 +31,11 @@
                     <div class="tfa-container">
                         <div class="tfa-checkbox" v-if="editMode">
                             <div class="field">
-                                <input class="is-checkradio is-small is-white" :id="'ckb_' + account.id" :value="account" type="checkbox" :name="'ckb_' + account.id" v-model="selectedAccounts">
+                                <input class="is-checkradio is-small is-white" :id="'ckb_' + account.id" :value="account.id" type="checkbox" :name="'ckb_' + account.id" v-model="selectedAccounts">
                                 <label :for="'ckb_' + account.id"></label>
                             </div>
                         </div>
-                        <div class="tfa-content is-size-3 is-size-4-mobile" @click.stop="showAccount(account.id)">  
+                        <div class="tfa-content is-size-3 is-size-4-mobile" @click.stop="showAccount(account)">  
                             <div class="tfa-text has-ellipsis">
                                 <img :src="'/storage/icons/' + account.icon" v-if="account.icon">
                                 {{ account.service }}
@@ -52,12 +52,31 @@
             </div>
         </div>
         <!-- No account -->
-        <div class="container has-text-centered" v-show="this.showNoAccount">
-            <p class="no-account"></p>
-            <p class="subtitle is-5 has-text-grey">
-                {{ $t('twofaccounts.no_account_here') }}
-            </p>
-            <router-link :to="{ name: 'create' }" class="button is-medium is-link is-focused">{{ $t('twofaccounts.add_one') }}</router-link>
+        <div class="container has-text-centered" v-show="showQuickForm">
+            <div class="columns is-mobile" :class="{ 'is-invisible' : this.accounts.length > 0}">
+                <div class="column quickform-header">
+                    {{ $t('twofaccounts.no_account_here') }}<br>
+                    {{ $t('twofaccounts.add_first_account') }}
+                </div>
+            </div>
+            <div class="container">
+                <form @submit.prevent="createAccount" @keydown="form.onKeydown($event)">
+                    <div class="columns is-mobile no-account is-vcentered">
+                        <div class="column has-text-centered">
+                            <label class="button is-link is-medium is-rounded is-focused">
+                                <input class="file-input" type="file" accept="image/*" v-on:change="uploadQrcode" ref="qrcodeInput">
+                                {{ $t('twofaccounts.forms.use_qrcode.val') }}
+                            </label>
+                        </div>
+                    </div>
+                    <field-error :form="form" field="qrcode" />
+                </form>
+            </div>
+            <div class="columns is-mobile">
+                <div class="column quickform-footer">
+                    <router-link :to="{ name: 'create' }" class="is-link">{{ $t('twofaccounts.use_full_form') }}</router-link>
+                </div>
+            </div>
         </div>
         <!-- modal -->
         <modal v-model="ShowTwofaccountInModal">
@@ -68,21 +87,32 @@
             <div class="columns is-gapless" v-if="this.accounts.length > 0">
                 <div class="column has-text-centered">
                     <div class="field is-grouped">
-                        <p class="control" v-if="!editMode">
-                            <router-link :to="{ name: 'create' }" class="button is-link is-rounded is-focus">
+                        <!-- New item buttons -->
+                        <p class="control" v-if="!showQuickForm && !editMode">
+                            <a class="button is-link is-rounded is-focus" @click="showQuickForm = true">
                                 <span>{{ $t('twofaccounts.new') }}</span>
                                 <span class="icon is-small">
                                     <font-awesome-icon :icon="['fas', 'qrcode']" />
                                 </span>
-                            </router-link>
+                            </a>
                         </p>
-                        <p class="control">
-                            <a class="button is-dark is-rounded" @click="setEditModeTo(true)" v-if="!editMode">{{ $t('twofaccounts.manage') }}</a>
-                            <a class="button is-success is-rounded" @click="setEditModeTo(false)" v-if="editMode">
+                        <!-- Manage button -->
+                        <p class="control" v-if="!showQuickForm && !editMode">
+                            <a class="button is-dark is-rounded" @click="setEditModeTo(true)">{{ $t('twofaccounts.manage') }}</a>
+                        </p>
+                        <!-- Done button -->
+                        <p class="control" v-if="!showQuickForm && editMode">
+                            <a class="button is-success is-rounded" @click="setEditModeTo(false)">
                                 <span>{{ $t('twofaccounts.done') }}</span>
                                 <span class="icon is-small">
                                     <font-awesome-icon :icon="['fas', 'check']" />
                                 </span>
+                            </a>
+                        </p>
+                        <!-- Cancel QuickFormButton -->
+                        <p class="control" v-if="showQuickForm">
+                            <a class="button is-dark is-rounded" @click="cancelQuickForm">
+                                {{ $t('commons.cancel') }}
                             </a>
                         </p>
                     </div>
@@ -100,6 +130,7 @@
 
     import Modal from '../components/Modal'
     import TwofaccountShow from '../components/TwofaccountShow'
+    import Form from './../components/Form'
 
     export default {
         data(){
@@ -110,8 +141,11 @@
                 search: '',
                 username : null,
                 editMode: this.InitialEditMode,
-                showAccounts: null,
-                showNoAccount: null,
+                QuickFormIsVisible: false,
+                form: new Form({
+                    qrcode: null
+                }),
+                axiosIsComplete: null,
             }
         },
 
@@ -122,6 +156,15 @@
                         return item.service.toLowerCase().includes(this.search.toLowerCase()) || item.account.toLowerCase().includes(this.search.toLowerCase());
                     }
                 );
+            },
+
+            showAccounts() {
+                return this.accounts.length > 0 && !this.QuickFormIsVisible ? true : false
+            },
+
+            showQuickForm: {
+                get: function() { return (this.QuickFormIsVisible || this.accounts.length === 0) && this.axiosIsComplete },
+                set: function(value) { this.QuickFormIsVisible = value }
             },
             
         },
@@ -148,6 +191,17 @@
 
         methods: {
 
+            async uploadQrcode(event) {
+
+                let imgdata = new FormData();
+                imgdata.append('qrcode', this.$refs.qrcodeInput.files[0]);
+
+                const { data } = await this.form.upload('/api/qrcode/decode', imgdata)
+
+                this.$router.push({ name: 'create', params: { qrAccount: data } });
+
+            },
+
             fetchAccounts() {
                 this.accounts = []
                 this.selectedAccounts = []
@@ -162,18 +216,24 @@
                         })
                     })
                     
-                    this.showAccounts = this.accounts.length > 0 ? true : false
-                    this.showNoAccount = !this.showAccounts
+                    this.axiosIsComplete = true
                 })
             },
 
-            showAccount(id) {
-                if( id ) {
-                    this.$refs.TwofaccountShow.getAccount(id)
+            showAccount(account) {
+                if(this.editMode) {
+
+                    for (var i=0 ; i<this.selectedAccounts.length ; i++) {
+                        if ( this.selectedAccounts[i] === account.id ) {
+                            this.selectedAccounts.splice(i,1);
+                            return
+                        }
+                    }
+
+                    this.selectedAccounts.push(account.id)
                 }
                 else {
-                    let err = new Error("Id missing")
-                    this.$router.push({ name: 'genericError', params: { err: err } });
+                    this.$refs.TwofaccountShow.showAccount(account.id)
                 }
             },
 
@@ -183,9 +243,6 @@
 
                     // Remove the deleted account from the collection
                     this.accounts = this.accounts.filter(a => a.id !== id)
-
-                    this.showAccounts = this.accounts.length > 0 ? true : false
-                    this.showNoAccount = !this.showAccounts
                 }
             },
 
@@ -193,7 +250,7 @@
                 if(confirm(this.$t('twofaccounts.confirm.delete'))) {
 
                     let ids = []
-                    this.selectedAccounts.forEach(account => ids.push(account.id))
+                    this.selectedAccounts.forEach(id => ids.push(id))
 
                     // Backend will delete all accounts at the same time
                     await this.axios.delete('/api/twofaccounts/batch', {data: ids} )
@@ -223,11 +280,18 @@
                 if( state === false ) {
                     this.selectedAccounts = []
                 }
+                else {
+                    this.search = '';
+                }
 
                 this.editMode = state
                 this.$parent.showToolbar = state
-            }
+            },
 
+            cancelQuickForm() {
+                this.form.clear()
+                this.showQuickForm = false
+            }
         },
         
         beforeRouteEnter (to, from, next) {
