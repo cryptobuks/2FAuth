@@ -13952,6 +13952,7 @@ a:hover {
     -webkit-box-orient: horizontal;
     -webkit-box-direction: normal;
             flex-direction: row;
+    padding: 0;
   }
 
   .tfa-container > div:first-of-type {

@@ -17474,7 +17474,7 @@ var render = function() {
                       _c(
                         "div",
                         {
-                          staticClass: "tfa-content is-size-3 is-size-4-mobile",
+                          staticClass: "tfa-content is-size-3",
                           on: {
                             click: function($event) {
                               $event.stopPropagation()
@@ -17500,7 +17500,7 @@ var render = function() {
                               "span",
                               {
                                 staticClass:
-                                  "is-family-primary is-size-6 is-size-7-mobile has-text-grey "
+                                  "is-family-primary is-size-6 has-text-grey "
                               },
                               [_vm._v(_vm._s(account.account))]
                             )
