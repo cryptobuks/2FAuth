@@ -13911,6 +13911,10 @@ a:hover {
   background-color: #242424 !important;
 }
 
+.pull-down-header {
+  background-color: #363636 !important;
+}
+
 .tfa {
   border-radius: 6px;
   text-align: center;
