@@ -26,37 +26,39 @@
                 </div>
             </div>
             <!-- accounts -->
-            <div class="accounts columns is-multiline is-centered">
-                <vue-pull-refresh :on-refresh="onRefresh" :config="{
-                    errorLabel: 'error',
-                    startLabel: '',
-                    readyLabel: '',
-                    loadingLabel: 'refreshing'
-                    }">
-                    <div class="tfa column is-narrow has-text-white" v-for="account in filteredAccounts">
-                        <div class="tfa-container">
-                            <div class="tfa-checkbox" v-if="editMode">
-                                <div class="field">
-                                    <input class="is-checkradio is-small is-white" :id="'ckb_' + account.id" :value="account.id" type="checkbox" :name="'ckb_' + account.id" v-model="selectedAccounts">
-                                    <label :for="'ckb_' + account.id"></label>
-                                </div>
-                            </div>
-                            <div class="tfa-content is-size-3 is-size-4-mobile" @click.stop="showAccount(account)">  
-                                <div class="tfa-text has-ellipsis">
-                                    <img :src="'/storage/icons/' + account.icon" v-if="account.icon">
-                                    {{ account.service }}
-                                    <span class="is-family-primary is-size-6 is-size-7-mobile has-text-grey ">{{ account.account }}</span>
-                                </div>
-                            </div>
-                            <div class="tfa-dots has-text-grey" v-if="editMode">
-                                <router-link :to="{ name: 'edit', params: { twofaccountId: account.id }}" class="tag is-dark is-rounded">
-                                    {{ $t('commons.edit') }}
-                                </router-link>
+            <vue-pull-refresh :on-refresh="onRefresh" :config="{
+                errorLabel: 'error',
+                startLabel: '',
+                readyLabel: '',
+                loadingLabel: 'refreshing'
+                }" class="accounts columns is-multiline is-centered">
+                <div class="tfa column is-narrow has-text-white" v-for="account in filteredAccounts">
+                    <div class="tfa-container">
+	                    <transition name="slideCheckbox">
+	                        <div class="tfa-checkbox" v-if="editMode">
+	                            <div class="field">
+	                                <input class="is-checkradio is-small is-white" :id="'ckb_' + account.id" :value="account.id" type="checkbox" :name="'ckb_' + account.id" v-model="selectedAccounts">
+	                                <label :for="'ckb_' + account.id"></label>
+	                            </div>
+	                        </div>
+	                    </transition>
+                        <div class="tfa-content is-size-3 is-size-4-mobile" @click.stop="showAccount(account)">  
+                            <div class="tfa-text has-ellipsis">
+                                <img :src="'/storage/icons/' + account.icon" v-if="account.icon">
+                                {{ account.service }}
+                                <span class="is-family-primary is-size-6 is-size-7-mobile has-text-grey ">{{ account.account }}</span>
                             </div>
                         </div>
+	                    <transition name="fadeInOut">
+	                        <div class="tfa-dots has-text-grey" v-if="editMode">
+	                            <router-link :to="{ name: 'edit', params: { twofaccountId: account.id }}" class="tag is-dark is-rounded">
+	                                {{ $t('commons.edit') }}
+	                            </router-link>
+	                        </div>
+	                    </transition>
                     </div>
-                </vue-pull-refresh>
-            </div>
+                </div>
+            </vue-pull-refresh>
         </div>
         <!-- No account -->
         <div class="container has-text-centered" v-show="showQuickForm">
@@ -70,7 +72,7 @@
                 <form @submit.prevent="createAccount" @keydown="form.onKeydown($event)">
                     <div class="columns is-mobile no-account is-vcentered">
                         <div class="column has-text-centered">
-                            <label class="button is-link is-medium is-rounded is-focused">
+                            <label :class="{'is-loading' : form.isBusy}" class="button is-link is-medium is-rounded is-focused">
                                 <input class="file-input" type="file" accept="image/*" v-on:change="uploadQrcode" ref="qrcodeInput">
                                 {{ $t('twofaccounts.forms.use_qrcode.val') }}
                             </label>
@@ -314,7 +316,167 @@
 
             next()
         }
-    }
+    };
 
 </script>
 
+<style>
+
+    .fadeInOut-enter-active {
+        animation: fadeIn 500ms
+    }
+    .fadeInOut-leave-active {
+        animation: fadeOut 500ms
+    }
+
+    .slideCheckbox-enter-active {
+        animation: enterFromTop 500ms
+    }
+
+    .slideCheckbox-enter-active + .tfa-content {
+        animation: addTopOffset 500ms
+    }
+
+    .slideCheckbox-leave-active {
+        animation: leaveToTop 500ms
+    }
+
+    .slideCheckbox-leave-active + .tfa-content {
+        animation: removeTopOffset 500ms
+    }
+
+	@media screen and (max-width: 768px) {
+	    .slideCheckbox-enter-active {
+	        animation: enterFromLeft 500ms
+	    }
+
+	    .slideCheckbox-enter-active + .tfa-content {
+	        animation: addLeftOffset 500ms
+	    }
+
+	    .slideCheckbox-leave-active {
+	        animation: leaveToLeft 500ms
+	    }
+
+	    .slideCheckbox-leave-active + .tfa-content {
+	        animation: removeLeftOffset 500ms
+	    }
+	}
+
+	/*FadeInOut*/
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@media screen and (max-width: 768px) {
+		@keyframes fadeIn {
+			from {
+				opacity: 0;
+			}
+			75% {
+				opacity: 0;
+			}
+			to {
+				opacity: 1;
+			}
+		}
+	}
+
+	@keyframes fadeOut {
+		from {
+			opacity: 1;
+		}
+		to {
+			opacity: 0;
+		}
+	}
+
+	/*Enter from left*/
+	@keyframes enterFromLeft {
+		from {
+			transform: translateX(-100%);
+			opacity: 0;
+		}
+		to {
+			transform: translateX(0);
+			opacity: 1;
+		}
+	}
+
+	@keyframes addLeftOffset {
+		from {
+			transform: translateX(-2.875rem);
+		}
+		to {
+			transform: translateX(0);
+		}
+	}
+
+	/*Enter from top*/
+	@keyframes enterFromTop {
+		from {
+			transform: translateY(-50%);
+			opacity: 0;
+		}
+		to {
+			transform: translateY(0);
+			opacity: 1;
+		}
+	}
+
+	@keyframes addTopOffset {
+		from {
+			transform: translateY(-2rem);
+		}
+		to {
+			transform: translateY(0);
+		}
+	}
+
+	/*Leave from left*/
+	@keyframes leaveToLeft {
+		from {
+			transform: translateX(0);
+		}
+		to {
+			transform: translateX(-100%);
+			opacity: 0;
+		}
+	}
+
+	@keyframes removeLeftOffset {
+		from {
+			transform: translateX(0);
+		}
+		to {
+			transform: translateX(-2.875rem);
+		}
+	}
+
+	/*Leave from top*/
+	@keyframes leaveToTop {
+		from {
+			transform: translateY(0);
+		}
+		to {
+			transform: translateY(-50%);
+			opacity: 0;
+		}
+	}
+
+	@keyframes removeTopOffset {
+		from {
+			transform: translateY(0);
+		}
+		to {
+			transform: translateY(-2rem);
+		}
+	}
+
+</style>
