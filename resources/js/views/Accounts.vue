@@ -92,45 +92,36 @@
             <twofaccount-show ref="TwofaccountShow" ></twofaccount-show>
         </modal>
         <!-- footer -->
-        <footer class="has-background-black-ter">
-            <div class="columns is-gapless" v-if="this.accounts.length > 0">
-                <div class="column has-text-centered">
-                    <div class="field is-grouped">
-                        <!-- New item buttons -->
-                        <p class="control" v-if="!showQuickForm && !editMode">
-                            <a class="button is-link is-rounded is-focus" @click="showQuickForm = true">
-                                <span>{{ $t('twofaccounts.new') }}</span>
-                                <span class="icon is-small">
-                                    <font-awesome-icon :icon="['fas', 'qrcode']" />
-                                </span>
-                            </a>
-                        </p>
-                        <!-- Manage button -->
-                        <p class="control" v-if="!showQuickForm && !editMode">
-                            <a class="button is-dark is-rounded" @click="setEditModeTo(true)">{{ $t('twofaccounts.manage') }}</a>
-                        </p>
-                        <!-- Done button -->
-                        <p class="control" v-if="!showQuickForm && editMode">
-                            <a class="button is-success is-rounded" @click="setEditModeTo(false)">
-                                <span>{{ $t('twofaccounts.done') }}</span>
-                                <span class="icon is-small">
-                                    <font-awesome-icon :icon="['fas', 'check']" />
-                                </span>
-                            </a>
-                        </p>
-                        <!-- Cancel QuickFormButton -->
-                        <p class="control" v-if="showQuickForm">
-                            <a class="button is-dark is-rounded" @click="cancelQuickForm">
-                                {{ $t('commons.cancel') }}
-                            </a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="content has-text-centered">
-                {{ $t('auth.hello', {username: username}) }} <router-link :to="{ name: 'profile' }" class="has-text-grey">{{ $t('commons.profile') }}</router-link> - <a class="has-text-grey" @click="logout">{{ $t('auth.sign_out') }}</a>
-            </div>
-        </footer>
+        <vue-footer :showButtons="this.accounts.length > 0">
+            <!-- New item buttons -->
+            <p class="control" v-if="!showQuickForm && !editMode">
+                <a class="button is-link is-rounded is-focus" @click="showQuickForm = true">
+                    <span>{{ $t('twofaccounts.new') }}</span>
+                    <span class="icon is-small">
+                        <font-awesome-icon :icon="['fas', 'qrcode']" />
+                    </span>
+                </a>
+            </p>
+            <!-- Manage button -->
+            <p class="control" v-if="!showQuickForm && !editMode">
+                <a class="button is-dark is-rounded" @click="setEditModeTo(true)">{{ $t('twofaccounts.manage') }}</a>
+            </p>
+            <!-- Done button -->
+            <p class="control" v-if="!showQuickForm && editMode">
+                <a class="button is-success is-rounded" @click="setEditModeTo(false)">
+                    <span>{{ $t('twofaccounts.done') }}</span>
+                    <span class="icon is-small">
+                        <font-awesome-icon :icon="['fas', 'check']" />
+                    </span>
+                </a>
+            </p>
+            <!-- Cancel QuickFormButton -->
+            <p class="control" v-if="showQuickForm">
+                <a class="button is-dark is-rounded" @click="cancelQuickForm">
+                    {{ $t('commons.cancel') }}
+                </a>
+            </p>
+        </vue-footer>
     </div>
 </template>
 
@@ -149,7 +140,6 @@
                 selectedAccounts: [],
                 ShowTwofaccountInModal : false,
                 search: '',
-                username : null,
                 editMode: this.InitialEditMode,
                 showQuickForm: false,
                 form: new Form({
@@ -176,7 +166,6 @@
 
         created() {
 
-            this.username = localStorage.getItem('user')
             this.fetchAccounts()
 
             // stop OTP generation on modal close
@@ -276,21 +265,6 @@
                 }
             },
 
-            async logout(evt) {
-                if(confirm(this.$t('auth.confirm.logout'))) {
-
-                    await this.axios.get('api/logout')
-
-                    localStorage.removeItem('jwt');
-                    localStorage.removeItem('user');
-
-                    delete this.axios.defaults.headers.common['Authorization'];
-
-                    this.$router.go('/login');
-
-                }
-            },
-
             setEditModeTo(state) {
                 if( state === false ) {
                     this.selectedAccounts = []
@@ -319,164 +293,3 @@
     };
 
 </script>
-
-<style>
-
-    .fadeInOut-enter-active {
-        animation: fadeIn 500ms
-    }
-    .fadeInOut-leave-active {
-        animation: fadeOut 500ms
-    }
-
-    .slideCheckbox-enter-active {
-        animation: enterFromTop 500ms
-    }
-
-    .slideCheckbox-enter-active + .tfa-content {
-        animation: addTopOffset 500ms
-    }
-
-    .slideCheckbox-leave-active {
-        animation: leaveToTop 500ms
-    }
-
-    .slideCheckbox-leave-active + .tfa-content {
-        animation: removeTopOffset 500ms
-    }
-
-	@media screen and (max-width: 768px) {
-	    .slideCheckbox-enter-active {
-	        animation: enterFromLeft 500ms
-	    }
-
-	    .slideCheckbox-enter-active + .tfa-content {
-	        animation: addLeftOffset 500ms
-	    }
-
-	    .slideCheckbox-leave-active {
-	        animation: leaveToLeft 500ms
-	    }
-
-	    .slideCheckbox-leave-active + .tfa-content {
-	        animation: removeLeftOffset 500ms
-	    }
-	}
-
-	/*FadeInOut*/
-
-	@keyframes fadeIn {
-		from {
-			opacity: 0;
-		}
-		to {
-			opacity: 1;
-		}
-	}
-
-	@media screen and (max-width: 768px) {
-		@keyframes fadeIn {
-			from {
-				opacity: 0;
-			}
-			75% {
-				opacity: 0;
-			}
-			to {
-				opacity: 1;
-			}
-		}
-	}
-
-	@keyframes fadeOut {
-		from {
-			opacity: 1;
-		}
-		to {
-			opacity: 0;
-		}
-	}
-
-	/*Enter from left*/
-	@keyframes enterFromLeft {
-		from {
-			transform: translateX(-100%);
-			opacity: 0;
-		}
-		to {
-			transform: translateX(0);
-			opacity: 1;
-		}
-	}
-
-	@keyframes addLeftOffset {
-		from {
-			transform: translateX(-2.875rem);
-		}
-		to {
-			transform: translateX(0);
-		}
-	}
-
-	/*Enter from top*/
-	@keyframes enterFromTop {
-		from {
-			transform: translateY(-50%);
-			opacity: 0;
-		}
-		to {
-			transform: translateY(0);
-			opacity: 1;
-		}
-	}
-
-	@keyframes addTopOffset {
-		from {
-			transform: translateY(-2rem);
-		}
-		to {
-			transform: translateY(0);
-		}
-	}
-
-	/*Leave from left*/
-	@keyframes leaveToLeft {
-		from {
-			transform: translateX(0);
-		}
-		to {
-			transform: translateX(-100%);
-			opacity: 0;
-		}
-	}
-
-	@keyframes removeLeftOffset {
-		from {
-			transform: translateX(0);
-		}
-		to {
-			transform: translateX(-2.875rem);
-		}
-	}
-
-	/*Leave from top*/
-	@keyframes leaveToTop {
-		from {
-			transform: translateY(0);
-		}
-		to {
-			transform: translateY(-50%);
-			opacity: 0;
-		}
-	}
-
-	@keyframes removeTopOffset {
-		from {
-			transform: translateY(0);
-		}
-		to {
-			transform: translateY(-2rem);
-		}
-	}
-
-</style>

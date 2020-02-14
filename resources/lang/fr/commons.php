@@ -13,11 +13,11 @@ return [
     |
     */
 
-    'cancel' => 'Cancel',
-    'update' => 'Update',
-    'copy_to_clipboard' => 'Copy to clipboard',
-    'profile' => 'Profile',
-    'edit' => 'Edit',
-    'delete' => 'Delete',
-    'save' => 'Save'
+    'cancel' => 'Annuler',
+    'update' => 'Mettre à jour',
+    'copy_to_clipboard' => 'Copier',
+    'profile' => 'Profil',
+    'edit' => 'Modifier',
+    'delete' => 'Supprimer',
+    'save' => 'Enregistrer'
 ];
