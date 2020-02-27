@@ -13,6 +13,7 @@ export default {
                 "login": "Login",
                 "email": "Email",
                 "password": "Password",
+                "confirm_password": "Confirm password",
                 "confirm_new_password": "Confirm new password",
                 "dont_have_account_yet": "Don't have your account yet?",
                 "already_register": "Already registered?",
@@ -37,7 +38,8 @@ export default {
             "profile": "Profile",
             "edit": "Edit",
             "delete": "Delete",
-            "save": "Save"
+            "save": "Save",
+            "close": "Close"
         },
         "errors": {
             "resource_not_found": "Resource not found",
@@ -52,6 +54,10 @@ export default {
             "something_wrong_with_server": "Something is wrong with your server",
             "Unable_to_decrypt_uri": "Unable to decrypt uri",
             "wrong_current_password": "Wrong current password, nothing has changed"
+        },
+        "languages": {
+            "en": "English",
+            "fr": "French"
         },
         "pagination": {
             "previous": "&laquo; Previous",
@@ -70,7 +76,16 @@ export default {
             "password": "Password",
             "confirm": [],
             "forms": {
-                "edit_settings": "Edit settings"
+                "edit_settings": "Edit settings",
+                "setting_saved": "Settings saved",
+                "language": {
+                    "label": "Language",
+                    "help": "Change the language used to translate the app interface."
+                },
+                "show_token_as_dot": {
+                    "label": "Show generated tokens as dot",
+                    "help": "Replace generated token caracters with *** to ensure confidentiality. Do not affect the copy/paste feature."
+                }
             }
         },
         "twofaccounts": {
@@ -279,7 +294,8 @@ export default {
             "profile": "Profil",
             "edit": "Modifier",
             "delete": "Supprimer",
-            "save": "Enregistrer"
+            "save": "Enregistrer",
+            "close": "Fermer"
         },
         "errors": {
             "resource_not_found": "Ressource introuvable",
@@ -294,6 +310,10 @@ export default {
             "something_wrong_with_server": "Il y a un problème avec votre serveur",
             "Unable_to_decrypt_uri": "uri impossible à décoder",
             "wrong_current_password": "Mot de passe actuel érroné, rien n\\a été modifié"
+        },
+        "languages": {
+            "en": "Anglais",
+            "fr": "Français"
         },
         "pagination": {
             "previous": "&laquo; Précédent",
@@ -312,7 +332,16 @@ export default {
             "password": "Mot de passe",
             "confirm": [],
             "forms": {
-                "edit_settings": "Modifier les réglages"
+                "edit_settings": "Modifier les réglages",
+                "setting_saved": "Réglages sauvegardés",
+                "language": {
+                    "label": "Langue",
+                    "help": "Traduit l'application dans la langue choisie"
+                },
+                "show_token_as_dot": {
+                    "label": "Masquer les codes générés",
+                    "help": "Remplace les caractères des codes générés par des *** pour garantir leur confidentialité. N'affecte pas la fonction copier/coller qui reste utilisable."
+                }
             }
         },
         "twofaccounts": {

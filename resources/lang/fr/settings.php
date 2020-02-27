@@ -21,6 +21,15 @@ return [
     ],
     'forms' => [
         'edit_settings' => 'Modifier les réglages',
+        'setting_saved' => 'Réglages sauvegardés',
+        'language' => [
+            'label' => 'Langue',
+            'help' => 'Traduit l\'application dans la langue choisie'
+        ],
+        'show_token_as_dot' => [
+            'label' => 'Masquer les codes générés',
+            'help' => 'Remplace les caractères des codes générés par des *** pour garantir leur confidentialité. N\'affecte pas la fonction copier/coller qui reste utilisable.'
+        ]
     ],
     
 

@@ -3,6 +3,8 @@ import Button from './Button'
 import FieldError from './FieldError'
 import FormWrapper from './FormWrapper'
 import FormField from './FormField'
+import FormSelect from './FormSelect'
+import FormSwitch from './FormSwitch'
 import FormButtons from './FormButtons'
 import VueFooter from './Footer'
 
@@ -12,6 +14,8 @@ import VueFooter from './Footer'
     FieldError,
     FormWrapper,
     FormField,
+    FormSelect,
+    FormSwitch,
     FormButtons,
     VueFooter,
 ].forEach(Component => {

@@ -21,6 +21,15 @@ return [
     ],
     'forms' => [
         'edit_settings' => 'Edit settings',
+        'setting_saved' => 'Settings saved',
+        'language' => [
+            'label' => 'Language',
+            'help' => 'Change the language used to translate the app interface.'
+        ],
+        'show_token_as_dot' => [
+            'label' => 'Show generated tokens as dot',
+            'help' => 'Replace generated token caracters with *** to ensure confidentiality. Do not affect the copy/paste feature.'
+        ],
     ],
     
 
