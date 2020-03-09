@@ -15,24 +15,24 @@ use Illuminate\Http\Request;
 
 Route::group(['middleware' => 'guest:api'], function () {
 
-    Route::post('login', 'UserController@login');
-    Route::post('checkuser', 'UserController@checkUser');
-    Route::post('register', 'UserController@register');
+    Route::post('login', 'Auth\LoginController@login');
+    Route::post('checkuser', 'Auth\RegisterController@checkUser');
+    Route::post('register', 'Auth\RegisterController@register');
 
     Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail');
-    Route::post('password/reset', 'Auth\ResetPasswordController@reset');
+    Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('password.reset');
 
 });
 
 Route::group(['middleware' => 'auth:api'], function() {
 
-    Route::post('logout', 'UserController@logout');
-    Route::patch('password', 'UserController@updatePassword');
-    Route::patch('user', 'UserController@update');
-    Route::get('user', 'UserController@getDetails');
+    Route::post('logout', 'Auth\LoginController@logout');
 
-    Route::get('settings', 'SettingController@index');
-    Route::post('settings', 'SettingController@store');
+    Route::get('settings/account', 'Settings\AccountController@show');
+    Route::patch('settings/account', 'Settings\AccountController@update');
+    Route::patch('settings/password', 'Settings\PasswordController@update');
+    Route::get('settings/options', 'Settings\OptionController@index');
+    Route::post('settings/options', 'Settings\OptionController@store');
 
     Route::delete('twofaccounts/batch', 'TwoFAccountController@batchDestroy');
     Route::apiResource('twofaccounts', 'TwoFAccountController');

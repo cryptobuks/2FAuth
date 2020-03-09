@@ -1,10 +1,10 @@
 <template>
     <form-wrapper :fail="fail" :success="success">
         <form @submit.prevent="handleSubmit" @keydown="form.onKeydown($event)">
-            <form-field :form="form" fieldName="password" inputType="password" :label="$t('auth.forms.new_password')" />
-            <form-field :form="form" fieldName="password_confirmation" inputType="password" :label="$t('auth.forms.confirm_new_password')" />
-            <form-field :form="form" fieldName="currentPassword" inputType="password" :label="$t('auth.forms.current_password')" />
-            <form-buttons :isBusy="form.isBusy" :caption="$t('auth.forms.change_password')" />
+            <form-field :form="form" fieldName="name" :label="$t('auth.forms.name')" autofocus />
+            <form-field :form="form" fieldName="email" inputType="email" :label="$t('auth.forms.email')" />
+            <form-field :form="form" fieldName="password" inputType="password" :label="$t('auth.forms.current_password.label')" :help="$t('auth.forms.current_password.help')" :hasOffset="true" />
+            <form-buttons :isBusy="form.isBusy" :caption="$t('commons.update')" />
         </form>
     </form-wrapper>
 </template>
@@ -19,11 +19,17 @@
                 success: '',
                 fail: '',
                 form: new Form({
-                    currentPassword : '',
+                    name : '',
+                    email : '',
                     password : '',
-                    password_confirmation : '',
                 })
             }
+        },
+
+        async mounted() {
+            const { data } = await this.form.get('/api/settings/account')
+
+            this.form.fill(data)
         },
 
         methods : {
@@ -33,13 +39,14 @@
                 this.fail = ''
                 this.success = ''
 
-                this.form.patch('/api/password', {returnError: true})
+                this.form.patch('/api/settings/account', {returnError: true})
                 .then(response => {
 
                     this.success = response.data.message
                 })
                 .catch(error => {
                     if( error.response.status === 400 ) {
+
                         this.fail = error.response.data.message
                     }
                     else if( error.response.status !== 422 ) {

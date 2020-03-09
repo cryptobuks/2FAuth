@@ -5,6 +5,8 @@ export default {
             "sign_in": "Sign in",
             "register": "Register",
             "hello": "Hi {username} !",
+            "throttle": "Too many login attempts. Please try again in {seconds} seconds.",
+            "already_authenticated": "Already authenticated",
             "confirm": {
                 "logout": "Are you sure you want to log out?"
             },
@@ -22,7 +24,10 @@ export default {
                 "request_password_reset": "Request a password reset",
                 "reset_password": "Reset password",
                 "new_password": "New password",
-                "current_password": "Current password",
+                "current_password": {
+                    "label": "Current password",
+                    "help": "Fill in your current password to confirm that it's you"
+                },
                 "change_password": "Change password",
                 "send_password_reset_link": "Send password reset link",
                 "change_your_password": "Change your password",
@@ -74,6 +79,7 @@ export default {
             "settings": "Settings",
             "account": "Account",
             "password": "Password",
+            "options": "Options",
             "confirm": [],
             "forms": {
                 "edit_settings": "Edit settings",
@@ -262,6 +268,8 @@ export default {
             "sign_in": "Se connecter",
             "register": "Créer un compte",
             "hello": "Hi {username} !",
+            "throttle": "Trop de tentatives de connexion. Veuillez réessayer dans {seconds} secondes.",
+            "already_authenticated": "Déjà authentifié",
             "confirm": {
                 "logout": "Etes-vous sûrs de vouloir vous déconnecter ?"
             },
@@ -270,15 +278,19 @@ export default {
                 "login": "Connexion",
                 "email": "Email",
                 "password": "Mot de passe",
-                "confirm_new_password": "Confirmez le mot de passe",
+                "confirm_password": "Confirmez le mot de passe",
+                "confirm_new_password": "Confirmez le nouveau mot de passe",
                 "dont_have_account_yet": "Pas encore de compte ?",
                 "already_register": "Déjà enregistré ?",
                 "password_do_not_match": "Le mot de passe ne correspond pas",
                 "forgot_your_password": "Mot de passe oublié ?",
-                "request_password_reset": "Réinitialiser le",
+                "request_password_reset": "Réinitialiser le mot de passe",
                 "reset_password": "Mot de passe oublié",
                 "new_password": "Nouveau mot de passe",
-                "current_password": "Mot de passe actuel",
+                "current_password": {
+                    "label": "Mot de passe actuel",
+                    "help": "Indiquez votre mot de passe actuel pour confirmer qu'il s'agit bien de vous"
+                },
                 "change_password": "Modifier le mot de passe",
                 "send_password_reset_link": "Envoyer",
                 "change_your_password": "Modifier votre mot de passe",
@@ -330,6 +342,7 @@ export default {
             "settings": "Réglages",
             "account": "Compte",
             "password": "Mot de passe",
+            "options": "Options",
             "confirm": [],
             "forms": {
                 "edit_settings": "Modifier les réglages",

@@ -17,6 +17,8 @@ return [
     'sign_in' => 'Sign in',
     'register' => 'Register',
     'hello' => 'Hi {username} !',
+    'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
+    'already_authenticated' => 'Already authenticated',
     'confirm' => [
         'logout' => 'Are you sure you want to log out?',
     ],
@@ -34,7 +36,10 @@ return [
         'request_password_reset' => 'Request a password reset',
         'reset_password' => 'Reset password',
         'new_password' => 'New password',
-        'current_password' => 'Current password',
+        'current_password' => [
+            'label' => 'Current password',
+            'help' => 'Fill in your current password to confirm that it\'s you'
+        ],
         'change_password' => 'Change password',
         'send_password_reset_link' => 'Send password reset link',
         'change_your_password' => 'Change your password',
@@ -42,6 +47,5 @@ return [
         'edit_account' => 'Edit account',
         'profile_saved' => 'Profile successfully updated!'
     ],
-    
 
 ];
