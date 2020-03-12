@@ -13411,6 +13411,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -13427,7 +13431,8 @@ __webpack_require__.r(__webpack_exports__);
       }, {
         text: this.$t('languages.fr'),
         value: 'fr'
-      }]
+      }],
+      version: appVersion
     };
   },
   methods: {
@@ -19281,6 +19286,14 @@ var render = function() {
     "form-wrapper",
     { attrs: { fail: _vm.fail, success: _vm.success } },
     [
+      _c("div", { staticClass: "tags has-addons" }, [
+        _c("span", { staticClass: "tag is-dark" }, [_vm._v("2FAuth")]),
+        _vm._v(" "),
+        _c("span", { staticClass: "tag is-info" }, [
+          _vm._v("v" + _vm._s(_vm.version))
+        ])
+      ]),
+      _vm._v(" "),
       _c(
         "form",
         {
@@ -38257,8 +38270,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /media/bubka/DocsDrive/Repositories/2FAuth/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /media/bubka/DocsDrive/Repositories/2FAuth/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\lf151415\Code Hub\Repositories\2FAuth\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\lf151415\Code Hub\Repositories\2FAuth\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
