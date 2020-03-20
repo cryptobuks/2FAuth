@@ -1,90 +1,4 @@
-/******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// define __esModule on exports
-/******/ 	__webpack_require__.r = function(exports) {
-/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 		}
-/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 	};
-/******/
-/******/ 	// create a fake namespace object
-/******/ 	// mode & 1: value is a module id, require it
-/******/ 	// mode & 2: merge all properties of value into the ns
-/******/ 	// mode & 4: return value when already ns object
-/******/ 	// mode & 8|1: behave like require
-/******/ 	__webpack_require__.t = function(value, mode) {
-/******/ 		if(mode & 1) value = __webpack_require__(value);
-/******/ 		if(mode & 8) return value;
-/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
-/******/ 		var ns = Object.create(null);
-/******/ 		__webpack_require__.r(ns);
-/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
-/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
-/******/ 		return ns;
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "/";
-/******/
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
-/******/ })
-/************************************************************************/
-/******/ ({
+(window["webpackJsonp"] = window["webpackJsonp"] || []).push([["/js/locales"],{
 
 /***/ "./resources/js/langs/locales.js":
 /*!***************************************!*\
@@ -130,7 +44,8 @@ __webpack_require__.r(__webpack_exports__);
         "change_your_password": "Change your password",
         "password_successfully_changed": "Password successfully changed ",
         "edit_account": "Edit account",
-        "profile_saved": "Profile successfully updated!"
+        "profile_saved": "Profile successfully updated!",
+        "welcome_to_demo_app_use_those_credentials": "Welcome to the 2FAuth demo.<br><br>You can connect using the email address <strong>demo@2fauth.app</strong> and the password <strong>demo</demo>"
       }
     },
     "commons": {
@@ -141,7 +56,8 @@ __webpack_require__.r(__webpack_exports__);
       "edit": "Edit",
       "delete": "Delete",
       "save": "Save",
-      "close": "Close"
+      "close": "Close",
+      "demo_do_not_post_sensitive_data": "This is a demo app, do not post any sensitive data"
     },
     "errors": {
       "resource_not_found": "Resource not found",
@@ -393,7 +309,8 @@ __webpack_require__.r(__webpack_exports__);
         "change_your_password": "Modifier votre mot de passe",
         "password_successfully_changed": "Mot de passe modifié avec succès",
         "edit_account": "Mis à jour du profil",
-        "profile_saved": "Profil mis à jour avec succès !"
+        "profile_saved": "Profil mis à jour avec succès !",
+        "welcome_to_demo_app_use_those_credentials": "bienvenue sur la démo de 2FAuth.<br><br>Vous pouvez vous connecter en utilisant l'adresse email <strong>demo@2fauth.app</strong> et le mot de passe <strong>demo</demo>"
       }
     },
     "commons": {
@@ -404,7 +321,8 @@ __webpack_require__.r(__webpack_exports__);
       "edit": "Modifier",
       "delete": "Supprimer",
       "save": "Enregistrer",
-      "close": "Fermer"
+      "close": "Fermer",
+      "demo_do_not_post_sensitive_data": "Site de démonstration, ne postez aucune donnée sensible"
     },
     "errors": {
       "resource_not_found": "Ressource introuvable",
@@ -634,9 +552,9 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! C:\Users\lf151415\Code Hub\Repositories\2FAuth\resources\js\langs\locales.js */"./resources/js/langs/locales.js");
+module.exports = __webpack_require__(/*! /media/bubka/DocsDrive/Repositories/2FAuth/resources/js/langs/locales.js */"./resources/js/langs/locales.js");
 
 
 /***/ })
 
-/******/ });
+},[[1,"/js/manifest"]]]);
