@@ -33,7 +33,8 @@ export default {
                 "change_your_password": "Change your password",
                 "password_successfully_changed": "Password successfully changed ",
                 "edit_account": "Edit account",
-                "profile_saved": "Profile successfully updated!"
+                "profile_saved": "Profile successfully updated!",
+                "welcome_to_demo_app_use_those_credentials": "Welcome to the 2FAuth demo.<br><br>You can connect using the email address <strong>demo@2fauth.app</strong> and the password <strong>demo</demo>"
             }
         },
         "commons": {
@@ -44,7 +45,8 @@ export default {
             "edit": "Edit",
             "delete": "Delete",
             "save": "Save",
-            "close": "Close"
+            "close": "Close",
+            "demo_do_not_post_sensitive_data": "This is a demo app, do not post any sensitive data"
         },
         "errors": {
             "resource_not_found": "Resource not found",
@@ -296,7 +298,8 @@ export default {
                 "change_your_password": "Modifier votre mot de passe",
                 "password_successfully_changed": "Mot de passe modifié avec succès",
                 "edit_account": "Mis à jour du profil",
-                "profile_saved": "Profil mis à jour avec succès !"
+                "profile_saved": "Profil mis à jour avec succès !",
+                "welcome_to_demo_app_use_those_credentials": "bienvenue sur la démo de 2FAuth.<br><br>Vous pouvez vous connecter en utilisant l'adresse email <strong>demo@2fauth.app</strong> et le mot de passe <strong>demo</demo>"
             }
         },
         "commons": {
@@ -307,7 +310,8 @@ export default {
             "edit": "Modifier",
             "delete": "Supprimer",
             "save": "Enregistrer",
-            "close": "Fermer"
+            "close": "Fermer",
+            "demo_do_not_post_sensitive_data": "Site de démonstration, ne postez aucune donnée sensible"
         },
         "errors": {
             "resource_not_found": "Ressource introuvable",

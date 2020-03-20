@@ -30,7 +30,8 @@ return [
         'show_token_as_dot' => [
             'label' => 'Masquer les codes générés',
             'help' => 'Remplace les caractères des codes générés par des *** pour garantir leur confidentialité. N\'affecte pas la fonction copier/coller qui reste utilisable.'
-        ]
+        ],
+
     ],
     
 
