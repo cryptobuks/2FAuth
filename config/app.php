@@ -22,7 +22,7 @@ return [
     |
     */
 
-    'version' => '1.0.0',
+    'version' => '1.1.0',
 
     /*
     |--------------------------------------------------------------------------
@@ -34,6 +34,7 @@ return [
     'options' => [
         'isDemoApp' => env('IS_DEMO_APP', false),
         'showTokenAsDot' => false,
+        'closeTokenOnCopy' => false,
     ],
 
     /*
