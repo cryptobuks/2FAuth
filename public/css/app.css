@@ -14816,7 +14816,6 @@ a:hover {
 .tfa {
   border-radius: 6px;
   text-align: center;
-  cursor: pointer;
   background-color: #1a1a1a;
   /*black-bis from Bulma*/
   padding: 0.75rem 1.5rem;
@@ -14862,12 +14861,13 @@ a:hover {
   }
 
   .tfa-container > div:last-of-type {
-    padding: 0 0.5rem 0 0;
+    padding: 0 1rem 0 0;
   }
 }
 
 .tfa-checkbox,
-.tfa-dots {
+.tfa-dots,
+.tfa-edit {
   display: -webkit-box;
   display: flex;
   -webkit-box-align: center;
@@ -14877,12 +14877,17 @@ a:hover {
 
 @media screen and (max-width: 768px) {
   .tfa-checkbox,
-  .tfa-dots {
+  .tfa-dots,
+  .tfa-edit {
     display: -webkit-box;
     display: flex;
     -webkit-box-align: center;
             align-items: center;
     padding: 0;
+  }
+
+  .tfa-dots {
+    margin-left: 1.5rem;
   }
 }
 
@@ -14890,6 +14895,11 @@ a:hover {
   -webkit-box-flex: 1;
           flex-grow: 1;
   overflow: hidden;
+}
+
+.tfa-dots {
+  cursor: -webkit-grab;
+  cursor: grab;
 }
 
 @media screen and (max-width: 768px) {
@@ -14903,9 +14913,14 @@ a:hover {
             order: 2;
   }
 
-  .tfa-dots {
+  .tfa-edit {
     -webkit-box-ordinal-group: 4;
             order: 3;
+  }
+
+  .tfa-dots {
+    -webkit-box-ordinal-group: 5;
+            order: 4;
   }
 }
 
@@ -14921,6 +14936,7 @@ a:hover {
 .tfa-text {
   display: block;
   max-width: 300px;
+  cursor: pointer;
 }
 
 .tfa img {
